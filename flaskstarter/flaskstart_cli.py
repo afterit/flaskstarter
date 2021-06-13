@@ -18,11 +18,11 @@ import subprocess
 import logging
 
 @click.group()
-def flaskstart():
+def flaskstarter():
     """A program to start a Flask project under a modular structure.
     """
 
-@flaskstart.command()
+@flaskstarter.command()
 @click.option('-n', '--name', default='example', help='Init a basic project.')
 @click.option('-l', '--login', prompt="Will you use Flask-Login? [yes/no]", default='no', help='Adds flask-login')
 @click.option('-a', '--alchemy', prompt="Will you use Flask-SQLAlchemy? [yes/no]", default='no', help='Adds flask-sqlalchemy')
@@ -109,4 +109,4 @@ def add_support_to(add, file, module):
 
 
 if __name__ == '__main__':
-    flaskstart(prog_name='flaskstart')
+    flaskstarter(prog_name='flaskstarter')

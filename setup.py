@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-  name = 'flaskstart',
-  packages = ['flaskstart'],
+  name = 'flaskstarter',
+  packages = ['flaskstarter'],
   version = '0.1',
   license='apache-2.0',
   description = 'A Flask project start-up CLI to create a modular ready projects.',
@@ -12,13 +12,12 @@ setup(
   keywords = ['flask', 'cli', 'project'],
   install_requires=[
           'click',
-          'venv',
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',      #"3 - Alpha", "4 - Beta" or "5 - Production/Stable"
     'Intended Audience :: Developers',
     'Topic :: Software Development :: Build Tools',
-    'License :: OSI Approved :: Apache license 2.0',
+    'License :: OSI Approved :: Apache Software License',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
