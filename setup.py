@@ -1,10 +1,16 @@
 from setuptools import setup
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
   name='flaskstarter',
   packages=['flaskstarter'],
   version='0.1.2',
   license='apache-2.0',
   description='A Flask project start-up CLI to create a modular ready projects.',
+  long_description=long_description,
+  long_description_content_type="text/markdown",
   author='Felipe Bastos Nunes',
   author_email='felipe.bastosn@gmail.com',
   url='https://github.com/felipebastos/flaskstart',
