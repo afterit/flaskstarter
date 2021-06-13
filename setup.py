@@ -2,7 +2,7 @@ from setuptools import setup
 setup(
   name='flaskstarter',
   packages=['flaskstarter'],
-  version='0.1.1',
+  version='0.1.2',
   license='apache-2.0',
   description='A Flask project start-up CLI to create a modular ready projects.',
   author='Felipe Bastos Nunes',
@@ -11,6 +11,11 @@ setup(
   download_url='https://github.com/felipebastos/flaskstart/archive/refs/tags/v0.1.tar.gz',
   keywords=['flask', 'cli', 'project'],
   install_requires=['click',],
+  entry_points={
+        'console_scripts': [
+            'flaskstarter = flaskstarter.flaskstart_cli:init',
+        ],
+    },
   classifiers=[
     'Development Status :: 3 - Alpha',      #"3 - Alpha", "4 - Beta" or "5 - Production/Stable"
     'Intended Audience :: Developers',
