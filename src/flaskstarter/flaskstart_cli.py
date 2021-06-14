@@ -15,7 +15,6 @@
 import click
 import os
 import subprocess
-import logging
 
 @click.group()
 def flaskstarter():
@@ -23,27 +22,26 @@ def flaskstarter():
     """
 
 @flaskstarter.command()
-@click.option('-n', '--name', default='example', help='Init a basic project.')
+@click.argument('name')
 @click.option('-l', '--login', prompt="Will you use Flask-Login? [yes/no]", default='no', help='Adds flask-login')
 @click.option('-a', '--alchemy', prompt="Will you use Flask-SQLAlchemy? [yes/no]", default='no', help='Adds flask-sqlalchemy')
 @click.option('-b', '--bcrypt', prompt="Will you use Flask-Bcrypt? [yes/no]", default='no', help='Adds flask-bcrypt')
 @click.option('-w', '--wtforms', prompt="Will you use Flask-WTForm? [yes/no]", default='no', help='Adds flask-wtform')
 def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     """Creates the project directory tree under the name provided."""
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     # All directories and basic python files are created here
-    logging.info('Creating project tree... ')
+    click.echo('Creating project tree... ')
     try:
         os.mkdir(os.path.join(os.getcwd(), name))
     except FileExistsError:
-        logging.error(f'Project with name {name} already exists. Exiting.')
+        click.echo(f'Project with name "{name}" already exists. Exiting.')
         exit(0)
     os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
     os.makedirs(os.path.join(os.getcwd(), name, name, 'static'))
     os.mkdir(os.path.join(os.getcwd(), name, '.venv'))
-    logging.info('Ok!')
+    click.echo('Done!')
 
-    logging.info('Creating first python scripts... ')
+    click.echo('Creating first python scripts... ')
     initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')
     initpy.write(f'# This file is part of {name} project.{os.linesep}from flask import Flask{os.linesep}')
     initpy.write(f'def create_app():{os.linesep}    app = Flask("__name__"){os.linesep}')
@@ -58,13 +56,13 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     routespy.write(f'def root():{os.linesep}')
     routespy.write(f'    return "Hello, from Flask!"{os.linesep}')
     routespy.close()
-    logging.info('Ok!')
+    click.echo('Done!')
 
     # Clonning your own virtualenv
-    logging.info("ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
-    logging.info('Clonning python onto its own virtual enviroment... ')
+    click.echo("ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
+    click.echo('Clonning python onto its own virtual enviroment... ')
     subprocess.run(f'python3 -m venv {os.path.join(os.getcwd(), name, ".venv")}', shell=True)
-    logging.info('Ok!')
+    click.echo('Done!')
 
     # Requirements will help you do the basic startup of your virtualenv.
     requirements = open(os.path.join(os.getcwd(), name, 'requirements.txt'), 'w')
@@ -74,10 +72,10 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     add_support_to(bcrypt, requirements, 'flask-bcrypt')
     add_support_to(wtforms, requirements, 'flask-wtf')
     requirements.close()
-    logging.info('If you do have other requirements, feel free to customize it.')
+    click.echo('If you do have other requirements, feel free to customize it.')
 
     # Creating some helpful scripts.
-    logging.info('I will create some helpful scripts for running the project.')
+    click.echo('I will create some helpful scripts for running the project.')
     runsh = open(os.path.join(os.getcwd(), name, 'run.sh'), 'w')
     runsh.write(f'#!/bin/bash{os.linesep}')
     runsh.write(f'. .venv/bin/activate{os.linesep}')
@@ -85,7 +83,8 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     runsh.write(f'export FLASK_ENV=development{os.linesep}')
     runsh.write(f'flask run{os.linesep}')
     runsh.close()
-    subprocess.run(f'chmod +x {os.path.join(os.getcwd(), name, "run.sh")}', shell=True)
+    if os.name == 'posix':
+        subprocess.run(f'chmod +x {os.path.join(os.getcwd(), name, "run.sh")}', shell=True)
 
     runbat = open(os.path.join(os.getcwd(), name, 'run.bat'), 'w')
     runbat.write(f'call .venv\Scripts\activate{os.linesep}')
@@ -93,18 +92,33 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     runbat.write(f'set FLASK_ENV=development{os.linesep}')
     runbat.write(f'flask run{os.linesep}')
     runbat.close()
-    logging.info('Scripts created. Feel free to customize it.')
+    click.echo('Scripts created. Feel free to customize it.')
+
+    #Requirements installing.
+    if os.name == 'posix':
+        click.echo('I will install the requirements for you.')
+        cmd = f'. {os.path.join(os.getcwd(), name, ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), name, "requirements.txt")};'
+        subprocess.call(cmd, shell=True)
+        click.echo('Done!')
+    elif os.name == 'nt':
+        temp = open(os.path.join(os.getcwd(), name, 'temp.bat'), 'w')
+        temp.write(f'call .venv/bin/activate{os.linesep}')
+        temp.write(f'pip install -r requirements.txt')
+        temp.close()
+        subprocess.run(os.path.join(os.getcwd(), name, 'temp.bat'), shell=True)
+
+    return 0
 
 
 def add_support_to(add, file, module):
     if add == 'yes':
-        logging.info(f'Adding {module} support... ')
+        click.echo(f'Adding {module} support... ')
         file.write(f'{module}{os.linesep}')
-        logging.info('Ok!')
+        click.echo('Done!')
     elif add == 'no':
-        logging.info(f'Skipping {module}')
+        click.echo(f'Skipping {module}')
     else:
-        logging.warning(f'Option "{add}" unrecognized for {module}.')
+        click.echo(f'Option "{add}" unrecognized for {module}.')
         exit(0)
 
 

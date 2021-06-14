@@ -1,12 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
   name='flaskstarter',
-  packages=['flaskstarter'],
-  version='0.1.3',
+  version='0.1.4',
   license='apache-2.0',
   description='A Flask project start-up CLI to create a modular ready projects.',
   long_description=long_description,
@@ -14,12 +13,12 @@ setup(
   author='Felipe Bastos Nunes',
   author_email='felipe.bastosn@gmail.com',
   url='https://github.com/felipebastos/flaskstart',
-  download_url='https://github.com/felipebastos/flaskstart/archive/refs/tags/v0.1.2.tar.gz',
-  keywords=['flask', 'cli', 'project'],
+  download_url='https://github.com/felipebastos/flaskstart/archive/refs/tags/v0.1.4.tar.gz',
+  keywords=['flask', 'cli', 'manage'],
   install_requires=['click',],
   entry_points={
         'console_scripts': [
-            'flaskstarter = flaskstarter.flaskstart_cli:init',
+            'flaskstarter = flaskstarter.flaskstart_cli:flaskstarter',
         ],
     },
   classifiers=[
@@ -35,4 +34,6 @@ setup(
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
   ],
+  package_dir={"": "src"},
+  packages=find_packages(where="src"),
 )
