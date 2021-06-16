@@ -5,7 +5,7 @@ all: build upload
 
 build:
 	python setup.py sdist
-	python setup.py bdist wheel --universal
+	python setup.py bdist_wheel --universal
 
 upload:
 	twine upload dist/flaskstarter-$(VERSION)*
