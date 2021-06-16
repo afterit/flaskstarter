@@ -16,6 +16,8 @@ devrun:
 
 devclean:
 	rm -rf $(TEMPPROJECT)
+	rm -rf build/*
+	pip uninstall flaskstarter
 
 devuninstall:
 	pip uninstall -y flaskstarter
