@@ -33,6 +33,12 @@ def flaskstarter():
 @click.option('-w', '--wtforms', prompt="Will you use Flask-WTForm? [yes/no]", default='no', help='Adds flask-wtform')
 def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     """Creates the project directory tree under the name provided."""
+
+    login = login == 'yes'
+    alchemy = alchemy == 'yes'
+    bcrypt = bcrypt == 'yes'
+    wtforms = wtforms == 'yes'
+
     # All directories and basic python files are created here
     click.echo('Creating project tree... ')
     try:
@@ -54,7 +60,7 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
 
     initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')    
     initpyt = env.get_template('init.pyt')
-    initpy.write(initpyt.render(name=name, flaskbcrypt=True, flasksqlalchemy=True, flasklogin=True))
+    initpy.write(initpyt.render(name=name, flaskbcrypt=bcrypt, flasksqlalchemy=alchemy, flasklogin=login))
     initpy.close()
 
     routespy = open(os.path.join(os.getcwd(), name, name, 'routes.py'), 'w')
@@ -111,15 +117,12 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
 
 
 def add_support_to(add, file, module):
-    if add == 'yes':
+    if add:
         click.echo(f'Adding {module} support... ')
         file.write(f'{module}{os.linesep}')
         click.echo('Done!')
-    elif add == 'no':
-        click.echo(f'Skipping {module}')
     else:
-        click.echo(f'Option "{add}" unrecognized for {module}.')
-        exit(0)
+        click.echo(f'Skipping {module}')
 
 
 if __name__ == '__main__':
