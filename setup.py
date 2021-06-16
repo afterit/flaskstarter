@@ -11,7 +11,7 @@ setup(
   long_description=long_description,
   long_description_content_type="text/markdown",
   author='Felipe Bastos Nunes',
-  author_email='felipe dot bastosn at gmail dot com',
+  author_email='felipe.bastosn@gmail.com',
   url='https://github.com/felipebastos/flaskstart',
   download_url='https://github.com/felipebastos/flaskstart/archive/refs/tags/v0.1.5.tar.gz',
   keywords=['flask', 'cli', 'project'],
