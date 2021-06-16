@@ -5,17 +5,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
   name='flaskstarter',
-  version='0.1.4',
+  version='0.1.5',
   license='apache-2.0',
   description='A Flask project start-up CLI to create a modular ready projects.',
   long_description=long_description,
   long_description_content_type="text/markdown",
   author='Felipe Bastos Nunes',
-  author_email='felipe.bastosn@gmail.com',
+  author_email='felipe dot bastosn at gmail dot com',
   url='https://github.com/felipebastos/flaskstart',
-  download_url='https://github.com/felipebastos/flaskstart/archive/refs/tags/v0.1.4.tar.gz',
-  keywords=['flask', 'cli', 'manage'],
-  install_requires=['click',],
+  download_url='https://github.com/felipebastos/flaskstart/archive/refs/tags/v0.1.5.tar.gz',
+  keywords=['flask', 'cli', 'project'],
+  install_requires=['click','Jinja2', 'MarkupSafe'],
   entry_points={
         'console_scripts': [
             'flaskstarter = flaskstarter.flaskstart_cli:flaskstarter',
@@ -36,4 +36,7 @@ setup(
   ],
   package_dir={"": "src"},
   packages=find_packages(where="src"),
+  package_data={
+        "flaskstarter": ["templates/*t"],
+  }
 )

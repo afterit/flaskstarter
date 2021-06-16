@@ -16,6 +16,10 @@ import click
 import os
 import subprocess
 
+import pkg_resources
+
+from jinja2 import Environment, PackageLoader, select_autoescape
+
 @click.group()
 def flaskstarter():
     """A program to start a Flask project under a modular structure.
@@ -39,22 +43,23 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
     os.makedirs(os.path.join(os.getcwd(), name, name, 'static'))
     os.mkdir(os.path.join(os.getcwd(), name, '.venv'))
+    os.makedirs(os.path.join(os.getcwd(), name, 'instance', 'uploads'))
     click.echo('Done!')
 
     click.echo('Creating first python scripts... ')
-    initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')
-    initpy.write(f'# This file is part of {name} project.{os.linesep}from flask import Flask{os.linesep}')
-    initpy.write(f'def create_app():{os.linesep}    app = Flask("__name__"){os.linesep}')
-    initpy.write(f'    with app.app_context():{os.linesep}')
-    initpy.write(f'        from . import routes{os.linesep}')
-    initpy.write(f'    return app{os.linesep}')
+    env = Environment(
+        loader=PackageLoader('flaskstarter', 'templates'),
+        autoescape=select_autoescape('pyt', 'sht', 'batt')
+    )
+
+    initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')    
+    initpyt = env.get_template('init.pyt')
+    initpy.write(initpyt.render(name=name, flaskbcrypt=True, flasksqlalchemy=True, flasklogin=True))
     initpy.close()
 
     routespy = open(os.path.join(os.getcwd(), name, name, 'routes.py'), 'w')
-    routespy.write(f'# This file is part of {name} project.{os.linesep}from flask import current_app as app{os.linesep}')
-    routespy.write(f'@app.route("/"){os.linesep}')
-    routespy.write(f'def root():{os.linesep}')
-    routespy.write(f'    return "Hello, from Flask!"{os.linesep}')
+    routespyt = env.get_template('routes.pyt')
+    routespy.write(routespyt.render())
     routespy.close()
     click.echo('Done!')
 
@@ -77,20 +82,15 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     # Creating some helpful scripts.
     click.echo('I will create some helpful scripts for running the project.')
     runsh = open(os.path.join(os.getcwd(), name, 'run.sh'), 'w')
-    runsh.write(f'#!/bin/bash{os.linesep}')
-    runsh.write(f'. .venv/bin/activate{os.linesep}')
-    runsh.write(f'export FLASK_APP={name}{os.linesep}')
-    runsh.write(f'export FLASK_ENV=development{os.linesep}')
-    runsh.write(f'flask run{os.linesep}')
+    runsht = env.get_template('run.sht')
+    runsh.write(runsht.render(name=name))
     runsh.close()
     if os.name == 'posix':
         subprocess.run(f'chmod +x {os.path.join(os.getcwd(), name, "run.sh")}', shell=True)
 
     runbat = open(os.path.join(os.getcwd(), name, 'run.bat'), 'w')
-    runbat.write(f'call .venv\Scripts\activate{os.linesep}')
-    runbat.write(f'set FLASK_APP={name}{os.linesep}')
-    runbat.write(f'set FLASK_ENV=development{os.linesep}')
-    runbat.write(f'flask run{os.linesep}')
+    runbatt = env.get_template('run.batt')
+    runbat.write(runbatt.render(name=name))
     runbat.close()
     click.echo('Scripts created. Feel free to customize it.')
 

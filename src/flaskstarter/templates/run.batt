@@ -1,0 +1,4 @@
+call .venv\Scripts\activate
+set FLASK_APP={name}
+set FLASK_ENV=development
+flask run
