@@ -12,32 +12,39 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import final
 import click
 import os
 import subprocess
 
-import pkg_resources
-
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+from flaskstarter.tools.requirements import add_support_to, install_requirements
+
+
+def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo('flaskstarter 0.2')
+    ctx.exit()
+
+
 @click.group()
+@click.option('--version', is_flag=True, default=False, callback=print_version,
+              expose_value=False, is_eager=True)
 def flaskstarter():
     """A program to start a Flask project under a modular structure.
     """
 
+
 @flaskstarter.command()
 @click.argument('name')
-@click.option('-l', '--login', prompt="Will you use Flask-Login? [yes/no]", default='no', help='Adds flask-login')
-@click.option('-a', '--alchemy', prompt="Will you use Flask-SQLAlchemy? [yes/no]", default='no', help='Adds flask-sqlalchemy')
-@click.option('-b', '--bcrypt', prompt="Will you use Flask-Bcrypt? [yes/no]", default='no', help='Adds flask-bcrypt')
-@click.option('-w', '--wtforms', prompt="Will you use Flask-WTForm? [yes/no]", default='no', help='Adds flask-wtform')
-def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
+@click.option('-l', '--login', is_flag=True, default=False, help='Adds flask-login.')
+@click.option('-a', '--alchemy', is_flag=True, default=False, help='Adds flask-sqlalchemy.')
+@click.option('-b', '--bcrypt', is_flag=True, default=False, help='Adds flask-bcrypt.')
+@click.option('-w', '--wtforms', is_flag=True, default=False, help='Adds flask-wtform.')
+def init(name : str, login : bool, alchemy : str, bcrypt : str, wtforms : str):
     """Creates the project directory tree under the name provided."""
-
-    login = login == 'yes'
-    alchemy = alchemy == 'yes'
-    bcrypt = bcrypt == 'yes'
-    wtforms = wtforms == 'yes'
 
     # All directories and basic python files are created here
     click.echo('Creating project tree... ')
@@ -62,12 +69,24 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     initpyt = env.get_template('init.pyt')
     initpy.write(initpyt.render(name=name, flaskbcrypt=bcrypt, flasksqlalchemy=alchemy, flasklogin=login))
     initpy.close()
-
+    
     routespy = open(os.path.join(os.getcwd(), name, name, 'routes.py'), 'w')
     routespyt = env.get_template('routes.pyt')
-    routespy.write(routespyt.render())
+    routespy.write(routespyt.render(name=name, login=login, db=alchemy))
     routespy.close()
+
+    if login and alchemy:
+        entitiespy = open(os.path.join(os.getcwd(), name, name, 'entities.py'), 'w')
+        entitiespyt = env.get_template('entities.pyt')
+        entitiespy.write(entitiespyt.render(name=name))
+        entitiespy.close()
+
     click.echo('Done!')
+
+    index = open(os.path.join(os.getcwd(), name, name, 'templates', 'index.html'), 'w')
+    indext = env.get_template('index.htmlt')
+    index.write(indext.render(name=name))
+    index.close()
 
     # Clonning your own virtualenv
     click.echo("ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
@@ -76,53 +95,27 @@ def init(name : str, login : str, alchemy : str, bcrypt : str, wtforms : str):
     click.echo('Done!')
 
     # Requirements will help you do the basic startup of your virtualenv.
-    requirements = open(os.path.join(os.getcwd(), name, 'requirements.txt'), 'w')
-    add_support_to('yes', requirements, 'flask')
-    add_support_to(login, requirements, 'flask-login')
-    add_support_to(alchemy, requirements, 'flask-sqlalchemy')
-    add_support_to(bcrypt, requirements, 'flask-bcrypt')
-    add_support_to(wtforms, requirements, 'flask-wtf')
-    requirements.close()
+    add_support_to(True, name, 'flask')
+    add_support_to(login, name, 'flask-login')
+    add_support_to(alchemy, name, 'flask-sqlalchemy')
+    add_support_to(bcrypt, name, 'flask-bcrypt')
+    add_support_to(wtforms, name, 'flask-wtf')
     click.echo('If you do have other requirements, feel free to customize it.')
 
     # Creating some helpful scripts.
-    click.echo('I will create some helpful scripts for running the project.')
-    runsh = open(os.path.join(os.getcwd(), name, 'run.sh'), 'w')
-    runsht = env.get_template('run.sht')
-    runsh.write(runsht.render(name=name))
-    runsh.close()
-    if os.name == 'posix':
-        subprocess.run(f'chmod +x {os.path.join(os.getcwd(), name, "run.sh")}', shell=True)
-
-    runbat = open(os.path.join(os.getcwd(), name, 'run.bat'), 'w')
-    runbatt = env.get_template('run.batt')
-    runbat.write(runbatt.render(name=name))
-    runbat.close()
-    click.echo('Scripts created. Feel free to customize it.')
+    click.echo('I will create a management script for running the project.')
+    manage = open(os.path.join(os.getcwd(), name, 'manage.py'), 'w')
+    managet = env.get_template('manage.pyt')
+    manage.write(managet.render(name=name))
+    manage.close()
+    click.echo('manage.py script created. Feel free to customize it.')
 
     #Requirements installing.
-    if os.name == 'posix':
-        click.echo('I will install the requirements for you.')
-        cmd = f'. {os.path.join(os.getcwd(), name, ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), name, "requirements.txt")};'
-        subprocess.call(cmd, shell=True)
-        click.echo('Done!')
-    elif os.name == 'nt':
-        temp = open(os.path.join(os.getcwd(), name, 'temp.bat'), 'w')
-        temp.write(f'call .venv/bin/activate{os.linesep}')
-        temp.write(f'pip install -r requirements.txt')
-        temp.close()
-        subprocess.run(os.path.join(os.getcwd(), name, 'temp.bat'), shell=True)
+    click.echo('I will install the requirements for you.')
+    install_requirements(name)
+    click.echo('Done!')
 
     return 0
-
-
-def add_support_to(add, file, module):
-    if add:
-        click.echo(f'Adding {module} support... ')
-        file.write(f'{module}{os.linesep}')
-        click.echo('Done!')
-    else:
-        click.echo(f'Skipping {module}')
 
 
 if __name__ == '__main__':

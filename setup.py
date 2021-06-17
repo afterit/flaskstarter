@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
   name='flaskstarter',
-  version='0.1.6',
+  version='0.2',
   license='apache-2.0',
   description='A Flask project start-up CLI to create a modular ready projects.',
   long_description=long_description,

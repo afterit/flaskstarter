@@ -1,4 +1,4 @@
-VERSION=0.1.6
+VERSION=0.2
 TEMPPROJECT=temp
 
 all: build upload
@@ -13,11 +13,11 @@ upload:
 devrun:
 	pip install -e . --upgrade
 	flaskstarter init $(TEMPPROJECT)
+	cd $(TEMPPROJECT); python manage.py runserver
 
-devclean:
+devclean: devuninstall
 	rm -rf $(TEMPPROJECT)
 	rm -rf build/*
-	pip uninstall flaskstarter
 
 devuninstall:
 	pip uninstall -y flaskstarter
