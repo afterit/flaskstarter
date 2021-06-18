@@ -39,11 +39,7 @@ def flaskstarter():
 
 @flaskstarter.command()
 @click.argument('name')
-@click.option('-l', '--login', is_flag=True, default=False, help='Adds flask-login.')
-@click.option('-a', '--alchemy', is_flag=True, default=False, help='Adds flask-sqlalchemy.')
-@click.option('-b', '--bcrypt', is_flag=True, default=False, help='Adds flask-bcrypt.')
-@click.option('-w', '--wtforms', is_flag=True, default=False, help='Adds flask-wtform.')
-def init(name : str, login : bool, alchemy : str, bcrypt : str, wtforms : str):
+def init(name : str):
     """Creates the project directory tree under the name provided."""
 
     # All directories and basic python files are created here
@@ -53,8 +49,17 @@ def init(name : str, login : bool, alchemy : str, bcrypt : str, wtforms : str):
     except FileExistsError:
         click.echo(f'Project with name "{name}" already exists. Exiting.')
         exit(0)
+    
+    os.makedirs(os.path.join(os.getcwd(), name, name, 'ext'))
+    ext_is_package = open(os.path.join(os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
+    ext_is_package.close()
+    os.makedirs(os.path.join(os.getcwd(), name, name, 'blueprints'))
+    blueprint_is_package = open(os.path.join(os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
+    blueprint_is_package.close()
+
     os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
     os.makedirs(os.path.join(os.getcwd(), name, name, 'static'))
+
     os.mkdir(os.path.join(os.getcwd(), name, '.venv'))
     os.makedirs(os.path.join(os.getcwd(), name, 'instance', 'uploads'))
     click.echo('Done!')
@@ -67,26 +72,32 @@ def init(name : str, login : bool, alchemy : str, bcrypt : str, wtforms : str):
 
     initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')    
     initpyt = env.get_template('init.pyt')
-    initpy.write(initpyt.render(name=name, flaskbcrypt=bcrypt, flasksqlalchemy=alchemy, flasklogin=login))
+    initpy.write(initpyt.render(name=name))
     initpy.close()
     
-    routespy = open(os.path.join(os.getcwd(), name, name, 'routes.py'), 'w')
-    routespyt = env.get_template('routes.pyt')
-    routespy.write(routespyt.render(name=name, login=login, db=alchemy))
-    routespy.close()
-
-    if login and alchemy:
-        entitiespy = open(os.path.join(os.getcwd(), name, name, 'entities.py'), 'w')
-        entitiespyt = env.get_template('entities.pyt')
-        entitiespy.write(entitiespyt.render(name=name))
-        entitiespy.close()
-
-    click.echo('Done!')
-
+    viewspy = open(os.path.join(os.getcwd(), name, name, 'views.py'), 'w')
+    viewspyt = env.get_template('views.pyt')
+    viewspy.write(viewspyt.render(name=name))
+    viewspy.close()
+    
     index = open(os.path.join(os.getcwd(), name, name, 'templates', 'index.html'), 'w')
     indext = env.get_template('index.htmlt')
     index.write(indext.render(name=name))
     index.close()
+
+    confpy = open(os.path.join(os.getcwd(), name, name, 'ext', 'configuration.py'), 'w')
+    confpyt = env.get_template('configuration.pyt')
+    confpy.write(confpyt.render())
+    confpy.close()
+
+    settingstoml = open(os.path.join(os.getcwd(), name, 'instance', 'settings.toml'), 'w')
+    settingstomlt = env.get_template('settings.tomlt')
+    settingstoml.write(settingstomlt.render())
+    settingstoml.close()
+
+    
+
+    click.echo('Done!')
 
     # Clonning your own virtualenv
     click.echo("ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
@@ -95,11 +106,8 @@ def init(name : str, login : bool, alchemy : str, bcrypt : str, wtforms : str):
     click.echo('Done!')
 
     # Requirements will help you do the basic startup of your virtualenv.
-    add_support_to(True, name, 'flask')
-    add_support_to(login, name, 'flask-login')
-    add_support_to(alchemy, name, 'flask-sqlalchemy')
-    add_support_to(bcrypt, name, 'flask-bcrypt')
-    add_support_to(wtforms, name, 'flask-wtf')
+    add_support_to(name, 'flask')
+    add_support_to(name, 'dynaconf')
     click.echo('If you do have other requirements, feel free to customize it.')
 
     # Creating some helpful scripts.

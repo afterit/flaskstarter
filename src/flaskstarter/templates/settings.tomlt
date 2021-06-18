@@ -1,0 +1,5 @@
+[default]
+SECRET_KEY = '123456'
+EXTENSIONS = [
+    # Name here packages with init_app to plugin them to app
+]

@@ -16,15 +16,12 @@ import click
 import os
 import subprocess
 
-def add_support_to(add, name, module):
+def add_support_to(name, module):
     try:
         requirements = open(os.path.join(os.getcwd(), name, 'requirements.txt'), 'a')
-        if add:
-            click.echo(f'Adding {module} support... ')
-            requirements.write(f'{module}{os.linesep}')
-            click.echo('Done!')
-        else:
-            click.echo(f'Skipping {module}')
+        click.echo(f'Adding {module} support... ')
+        requirements.write(f'{module}{os.linesep}')
+        click.echo('Done!')        
     except:
         click.echo(f"Couldn't create requirements.txt on {name}")
     finally:

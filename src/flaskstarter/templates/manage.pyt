@@ -34,15 +34,15 @@ def runserver(port):
 
 @manage.command()
 @click.argument('name')
-def createblueprint(name : str):
+def create_blueprint(name : str):
     '''Creates but does not add to init a blueprint file.'''
     os.mkdir(os.path.join(os.getcwd(), '{{name}}', name))
-    blueprint = open(os.path.join(os.getcwd(), '{{name}}', name, '__init__.py'), 'w')
-    blueprint_string = "from flask import Blueprint\n\nbp = Blueprint('$name', __name__, url_prefix='/$name')\n@bp.route('/')\ndef root():\n    return 'Hello from $name'"
+    blueprint = open(os.path.join(os.getcwd(), '{{name}}', 'blueprints', f'{name}.py'), 'w')
+    blueprint_string = "from flask import Blueprint\n\nbp = Blueprint('$name', __name__, url_prefix='/$name')\n@bp.route('/')\ndef root():\n    return 'Hello from $name'\ndef init_app(app):\n    app.register_blueprint(bp)"
     bluet = Template(blueprint_string)
     blueprint.write(bluet.substitute(name=name))
     blueprint.close()
-    click.echo('Blueprint created. Remember to add it to your application.')
+    click.echo('Blueprint created. Remember to add it to your application on instance/settings.toml.')
 
 if __name__ == '__main__':
     manage(prog_name='manage')
