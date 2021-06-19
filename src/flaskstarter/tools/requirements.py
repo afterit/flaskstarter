@@ -16,12 +16,22 @@ import click
 import os
 import subprocess
 
+
 def add_support_to(name, module):
+    """Writes down the module name on project's requirements.txt.
+
+    Warning: called only on project's creation time.
+
+    Args:
+        name (string): Project's name.
+        module (string): Library to add to requirements.txt.
+    """
     try:
-        requirements = open(os.path.join(os.getcwd(), name, 'requirements.txt'), 'a')
+        requirements = open(os.path.join(
+            os.getcwd(), name, 'requirements.txt'), 'a')
         click.echo(f'Adding {module} support... ')
         requirements.write(f'{module}{os.linesep}')
-        click.echo('Done!')        
+        click.echo('Done!')
     except:
         click.echo(f"Couldn't create requirements.txt on {name}")
     finally:
@@ -29,6 +39,13 @@ def add_support_to(name, module):
 
 
 def install_requirements(name):
+    """Installs the requirements.txt on destination project's virtual environment.
+
+    Warning: MS Windows wasn't tested yet.
+
+    Args:
+        name (string): Project's name.
+    """
     cmd = ''
     if os.name == 'posix':
         cmd = f'. {os.path.join(os.getcwd(), name, ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), name, "requirements.txt")};'

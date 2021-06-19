@@ -12,7 +12,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import final
 import click
 import os
 import subprocess
@@ -23,9 +22,18 @@ from flaskstarter.tools.requirements import add_support_to, install_requirements
 
 
 def print_version(ctx, param, value):
+    """Prints CLI version on 'flaskstarter --version'.
+
+    Explained on Click documentation as a pattern to attend --version.
+
+    Args:
+        ctx ([type]): Checks Click's documentation.
+        param ([type]): Checks Click's documentation.
+        value ([type]): Checks Click's documentation.
+    """
     if not value or ctx.resilient_parsing:
         return
-    click.echo('flaskstarter 0.2')
+    click.echo('flaskstarter 0.2.1')
     ctx.exit()
 
 
@@ -33,14 +41,18 @@ def print_version(ctx, param, value):
 @click.option('--version', is_flag=True, default=False, callback=print_version,
               expose_value=False, is_eager=True)
 def flaskstarter():
-    """A program to start a Flask project under a modular structure.
-    """
+    """A program to start a Flask project under a modular structure."""
 
 
 @flaskstarter.command()
 @click.argument('name')
-def init(name : str):
-    """Creates the project directory tree under the name provided."""
+def init(name: str):
+    """Creates the project directory tree under the name provided.
+
+    Args:
+        name (str): Project's name to create.
+
+    """
 
     # All directories and basic python files are created here
     click.echo('Creating project tree... ')
@@ -49,12 +61,14 @@ def init(name : str):
     except FileExistsError:
         click.echo(f'Project with name "{name}" already exists. Exiting.')
         exit(0)
-    
+
     os.makedirs(os.path.join(os.getcwd(), name, name, 'ext'))
-    ext_is_package = open(os.path.join(os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
+    ext_is_package = open(os.path.join(
+        os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
     ext_is_package.close()
     os.makedirs(os.path.join(os.getcwd(), name, name, 'blueprints'))
-    blueprint_is_package = open(os.path.join(os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
+    blueprint_is_package = open(os.path.join(
+        os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
     blueprint_is_package.close()
 
     os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
@@ -64,51 +78,58 @@ def init(name : str):
     os.makedirs(os.path.join(os.getcwd(), name, 'instance', 'uploads'))
     click.echo('Done!')
 
-    click.echo('Creating first python scripts... ')
+    click.echo('Creating first python scripts and configurations... ')
     env = Environment(
         loader=PackageLoader('flaskstarter', 'templates'),
         autoescape=select_autoescape('pyt', 'sht', 'batt')
     )
 
-    initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')    
+    initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')
     initpyt = env.get_template('init.pyt')
     initpy.write(initpyt.render(name=name))
     initpy.close()
-    
+
     viewspy = open(os.path.join(os.getcwd(), name, name, 'views.py'), 'w')
     viewspyt = env.get_template('views.pyt')
     viewspy.write(viewspyt.render(name=name))
     viewspy.close()
-    
-    index = open(os.path.join(os.getcwd(), name, name, 'templates', 'index.html'), 'w')
+
+    index = open(os.path.join(os.getcwd(), name, name,
+                 'templates', 'index.html'), 'w')
     indext = env.get_template('index.htmlt')
     index.write(indext.render(name=name))
     index.close()
 
-    confpy = open(os.path.join(os.getcwd(), name, name, 'ext', 'configuration.py'), 'w')
+    confpy = open(os.path.join(os.getcwd(), name, name,
+                  'ext', 'configuration.py'), 'w')
     confpyt = env.get_template('configuration.pyt')
     confpy.write(confpyt.render())
     confpy.close()
 
-    settingstoml = open(os.path.join(os.getcwd(), name, 'instance', 'settings.toml'), 'w')
+    settingstoml = open(os.path.join(os.getcwd(), name,
+                        'instance', 'settings.toml'), 'w')
     settingstomlt = env.get_template('settings.tomlt')
     settingstoml.write(settingstomlt.render())
     settingstoml.close()
-
-    
-
     click.echo('Done!')
 
     # Clonning your own virtualenv
-    click.echo("ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
+    click.echo(
+        "ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
     click.echo('Clonning python onto its own virtual enviroment... ')
-    subprocess.run(f'python3 -m venv {os.path.join(os.getcwd(), name, ".venv")}', shell=True)
+    subprocess.run(
+        f'python3 -m venv {os.path.join(os.getcwd(), name, ".venv")}', shell=True)
     click.echo('Done!')
 
     # Requirements will help you do the basic startup of your virtualenv.
     add_support_to(name, 'flask')
     add_support_to(name, 'dynaconf')
     click.echo('If you do have other requirements, feel free to customize it.')
+
+    # Requirements installing.
+    click.echo('I will install the requirements for you.')
+    install_requirements(name)
+    click.echo('Done!')
 
     # Creating some helpful scripts.
     click.echo('I will create a management script for running the project.')
@@ -118,13 +139,8 @@ def init(name : str):
     manage.close()
     click.echo('manage.py script created. Feel free to customize it.')
 
-    #Requirements installing.
-    click.echo('I will install the requirements for you.')
-    install_requirements(name)
-    click.echo('Done!')
-
     return 0
 
 
 if __name__ == '__main__':
-    flaskstarter(prog_name='flaskstarter')
+    flaskstarter(prog_name='flaskstarter')  # pylint: disable=unexpected-keyword-arg
