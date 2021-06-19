@@ -12,6 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+
 import click
 import os
 import subprocess
@@ -113,7 +114,7 @@ def init(name: str):
     settingstoml.close()
     click.echo('Done!')
 
-    # Clonning your own virtualenv
+    # Clonning project's own virtualenv
     click.echo(
         "ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
     click.echo('Clonning python onto its own virtual enviroment... ')

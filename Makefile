@@ -1,34 +1,41 @@
 VERSION ?= 0.2.1
 TEMP_PROJECT ?= temp
+VENV := .venv
 
-# Deploy recipes
-build:
-	python setup.py sdist
-	python setup.py bdist_wheel --universal
+check:
+	cat -e -t -v Makefile
+
+all: venv
+
+build: venv
+	./$(VENV)/bin/python setup.py sdist
+	./$(VENV)/bin/python setup.py bdist_wheel --universal
 
 deploy: build
 	twine upload dist/flaskstarter-$(VERSION)*
 
-# Development recipes
-.venv/bin/activate: requirements-dev.txt
-    python3 -m venv .venv
-    ./.venv/bin/pip install -r requirements-dev.txt
+$(VENV)/bin/activate: requirements-dev.txt
+	python3 -m venv $(VENV)
+	./$(VENV)/bin/pip install -r requirements-dev.txt
 
-install: .venv/bin/activate
-	pip install -e . --upgrade
+venv: $(VENV)/bin/activate
+
+install: venv
+	./$(VENV)/bin/pip install -e . --upgrade
 
 run: install
 	flaskstarter init $(TEMP_PROJECT)
-	cd $(TEMP_PROJECT); python manage.py runserver
+	cd $(TEMP_PROJECT); ./$(VENV)/bin/python manage.py runserver
 
 uninstall:
-	pip uninstall -y flaskstarter
+	./$(VENV)/bin/pip uninstall -y flaskstarter
 
-clean: devuninstall
+clean:
 	rm -rf $(TEMP_PROJECT)
 	rm -rf build
 	rm -rf dist
-	find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
-	find . | grep -E "(egg-info$)" | xargs rm -rf
+	rm -rf $(VENV)
+	find . | grep -E "(__pycache__)" | xargs rm -rf
+	find . | grep -E "(egg-info)" | xargs rm -rf
 
 .PHONY: install run uninstall clean build deploy

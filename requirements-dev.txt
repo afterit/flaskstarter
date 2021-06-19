@@ -3,3 +3,4 @@ Jinja2==3.0.1
 MarkupSafe==2.0.1
 pytest
 autopep8
+pylint
