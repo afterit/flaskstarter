@@ -34,7 +34,7 @@ def print_version(ctx, param, value):
     """
     if not value or ctx.resilient_parsing:
         return
-    click.echo('flaskstarter 0.2.1')
+    click.echo(f'flaskstarter 0.2.2')
     ctx.exit()
 
 
@@ -85,33 +85,20 @@ def init(name: str):
         autoescape=select_autoescape('pyt', 'sht', 'batt')
     )
 
-    initpy = open(os.path.join(os.getcwd(), name, name, '__init__.py'), 'w')
-    initpyt = env.get_template('init.pyt')
-    initpy.write(initpyt.render(name=name))
-    initpy.close()
+    templates_and_dest = {
+       'init.pyt':  os.path.join(os.getcwd(), name, name, '__init__.py'),
+       'views.pyt': os.path.join(os.getcwd(), name, name, 'views.py'),
+       'index.htmlt': os.path.join(os.getcwd(), name, name, 'templates', 'index.html'),
+       'configuration.pyt': os.path.join(os.getcwd(), name, name, 'ext', 'configuration.py'),
+       'settings.tomlt': os.path.join(os.getcwd(), name, 'instance', 'settings.toml'),
+       'manage.pyt': os.path.join(os.getcwd(), name, 'manage.py')
+    }
 
-    viewspy = open(os.path.join(os.getcwd(), name, name, 'views.py'), 'w')
-    viewspyt = env.get_template('views.pyt')
-    viewspy.write(viewspyt.render(name=name))
-    viewspy.close()
+    for template, destination in templates_and_dest.items():
+        with open(destination, 'w') as f:
+            template_file = env.get_template(template)
+            f.write(template_file.render(name=name))
 
-    index = open(os.path.join(os.getcwd(), name, name,
-                 'templates', 'index.html'), 'w')
-    indext = env.get_template('index.htmlt')
-    index.write(indext.render(name=name))
-    index.close()
-
-    confpy = open(os.path.join(os.getcwd(), name, name,
-                  'ext', 'configuration.py'), 'w')
-    confpyt = env.get_template('configuration.pyt')
-    confpy.write(confpyt.render())
-    confpy.close()
-
-    settingstoml = open(os.path.join(os.getcwd(), name,
-                        'instance', 'settings.toml'), 'w')
-    settingstomlt = env.get_template('settings.tomlt')
-    settingstoml.write(settingstomlt.render())
-    settingstoml.close()
     click.echo('Done!')
 
     # Clonning project's own virtualenv
@@ -127,18 +114,9 @@ def init(name: str):
     add_support_to(name, 'dynaconf')
     click.echo('If you do have other requirements, feel free to customize it.')
 
-    # Requirements installing.
     click.echo('I will install the requirements for you.')
     install_requirements(name)
     click.echo('Done!')
-
-    # Creating some helpful scripts.
-    click.echo('I will create a management script for running the project.')
-    manage = open(os.path.join(os.getcwd(), name, 'manage.py'), 'w')
-    managet = env.get_template('manage.pyt')
-    manage.write(managet.render(name=name))
-    manage.close()
-    click.echo('manage.py script created. Feel free to customize it.')
 
     return 0
 

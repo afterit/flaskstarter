@@ -1,6 +1,6 @@
 click==8.0.1
 Jinja2==3.0.1
 MarkupSafe==2.0.1
-pytest
-autopep8
-pylint
+pytest==6.2.4
+autopep8==1.5.7
+pylint==2.8.3
