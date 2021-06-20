@@ -1,6 +1,5 @@
 .pytest_cache
 .vscode
-MANIFEST
 
 # Não fazer upload de arquivos de instância pro GitHub
 instance/
