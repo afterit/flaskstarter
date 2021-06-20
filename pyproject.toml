@@ -6,6 +6,7 @@ authors = ["Felipe Bastos Nunes <felipe.bastosn@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/felipebastos/flaskstart"
+homepage = "https://github.com/felipebastos/flaskstart"
 keywords = ['flask', 'cli', 'project']
 classifiers = [
     'Development Status :: 3 - Alpha',      #"3 - Alpha", "4 - Beta" or "5 - Production/Stable"
