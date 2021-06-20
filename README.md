@@ -7,7 +7,7 @@ It also assumes you are using Python 3.6+.
 
 To install flaskstarter use the usual:
 
-`pip install flaskstarter`
+`pip install flaskstarter --require-hashes`
 
 To see its help:
 
@@ -25,22 +25,26 @@ Now, after project creation, you can enter on its directory and make full use of
 
 By now you can create a blueprint structure by typing the bellow on project root:
 
-`$ python manage.py createblueprint [blueprint_name]`
+`$ python manage.py create-blueprint [blueprint_name]`
 
-After that, remember to go on the app init file to register the blueprint on it.
+After that, remember to go onto app init file to register the blueprint on it. There is an EXTENSIONS variable where you can list all the plugins to autoimport. It uses factory design.
 
 To run your app you can use the bellow on project root:
 
 `$ python manage.py runserver`
 
+Ask manage.py for runserver help to see its options.
+
 ## What the project does for you
 
-It creates project tree, a functional virtualenv on .venv, the init and routes files with a helloworld example and a manage.py script to run the project with the virtual enviroment created and attach blueprints to it. It now installs the requirements on project's .venv on POSIX systems.
+It creates project tree, a functional virtualenv on .venv, the init and routes files with a helloworld example and a manage.py script to run the project with the virtual enviroment created and attach blueprints to it. It now installs the requirements on project's .venv on POSIX systems. Feel free to change to poetry and pyproject.toml pattern.
+
+A word of warning: when commiting and pushing your project to versioning servers, remember to put instance folder into .gitignore, if not yet. And then remember to place it into deploy destination.
 
 ## What the project does not do for you
 
-It still can't update init file with modules configurations. By now blueprints aren't created with custom folder.
+It does not autoconfigure plugins on settings.toml yet. It doesn't force you to use pip, poetry or any other tool but flask and dynaconf on the Flask project created.
 
 ## Future
 
-Add more power to manage.py.
+Add more power to manage.py. Maybe autoconfigure plugins and blueprints on settings.toml.
