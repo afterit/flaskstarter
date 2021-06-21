@@ -20,11 +20,15 @@
 import click
 import os
 import subprocess
-from string import Template
+import toml
+
+from jinja2 import Environment, PackageLoader, select_autoescape
+
 
 @click.group()
 def manage():
     '''This script manages the {{name}} project.'''
+
 
 @manage.command()
 @click.argument('port', default='5000')
@@ -37,17 +41,40 @@ def runserver(port):
         cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}; set FLASK_ENV=development; flask run --port={port}'
     subprocess.run(cmd, shell=True)
 
+
 @manage.command()
 @click.argument('name')
-def create_blueprint(name : str):
-    '''Creates but does not add to init a blueprint file.'''
-    os.mkdir(os.path.join(os.getcwd(), '{{name}}', name))
-    blueprint = open(os.path.join(os.getcwd(), '{{name}}', 'blueprints', f'{name}.py'), 'w')
-    blueprint_string = "from flask import Blueprint\n\nbp = Blueprint('$name', __name__, url_prefix='/$name')\n@bp.route('/')\ndef root():\n    return 'Hello from $name'\ndef init_app(app):\n    app.register_blueprint(bp)"
-    bluet = Template(blueprint_string)
-    blueprint.write(bluet.substitute(name=name))
-    blueprint.close()
-    click.echo('Blueprint created. Remember to add it to your application on instance/settings.toml.')
+@click.option('-t', '--templates', help="sets if the blueprint will use a private templates' directory.", is_flag=True)
+def create_blueprint(name: str, templates: bool):
+    '''Creates blueprint under blueprints directory and adds it to instance's settings.toml.'''
+    os.mkdir(os.path.join(os.getcwd(), '{{name}}', 'blueprints', name))
+    if templates:
+        tf = os.path.join(os.getcwd(), '{{name}}', 'blueprints', name, 'templates', name)
+        os.makedirs(tf)
+        click.echo(f"Place this blueprint's templates under {tf}")
+
+    env = Environment(
+        loader=PackageLoader('flaskstarter', 'templates'),
+        autoescape=select_autoescape('pyt', 'htmlt')
+    )
+    init = open(os.path.join(
+        os.getcwd(), '{{name}}', 'blueprints', name, '__init__.py'), 'w')
+    init.close()
+    with open(os.path.join(os.getcwd(), '{{name}}', 'blueprints', name, f'{name}.py'), 'w') as blueprint:
+        bluet = env.get_template('blueprint.pyt')
+        blueprint.write(bluet.render(
+            name=name, templates=templates))
+
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    settings['default']['EXTENSIONS'].append(
+        f'{{name}}.blueprints.{name}.{name}')
+    with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
+        f.write(toml.dumps(settings))
+
+    click.echo(
+        'Blueprint created and registered on instance/settings.toml. Restart your app if running.')
+
 
 if __name__ == '__main__':
     manage(prog_name='manage')

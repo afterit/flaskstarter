@@ -34,7 +34,7 @@ def print_version(ctx, param, value):
     """
     if not value or ctx.resilient_parsing:
         return
-    click.echo(f'flaskstarter 0.2.2')
+    click.echo(f'flaskstarter 0.2.3')
     ctx.exit()
 
 
@@ -82,7 +82,7 @@ def init(name: str):
     click.echo('Creating first python scripts and configurations... ')
     env = Environment(
         loader=PackageLoader('flaskstarter', 'templates'),
-        autoescape=select_autoescape('pyt', 'sht', 'batt')
+        autoescape=select_autoescape('pyt', 'htmlt')
     )
 
     templates_and_dest = {
@@ -112,6 +112,9 @@ def init(name: str):
     # Requirements will help you do the basic startup of your virtualenv.
     add_support_to(name, 'flask')
     add_support_to(name, 'dynaconf')
+    add_support_to(name, 'toml')
+    add_support_to(name, 'flaskstarter')
+
     click.echo('If you do have other requirements, feel free to customize it.')
 
     click.echo('I will install the requirements for you.')

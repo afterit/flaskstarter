@@ -27,6 +27,8 @@ By now you can create a blueprint structure by typing the bellow on project root
 
 `$ python manage.py create-blueprint [blueprint_name]`
 
+If it will work as an API blueprint, that's enough. But maybe it is not and you want to use private templates related only to this blueprint. This is solved by adding a '-t' or '--templates' to the above command.
+
 After that, remember to go onto app init file to register the blueprint on it. There is an EXTENSIONS variable where you can list all the plugins to autoimport. It uses factory design.
 
 To run your app you can use the bellow on project root:
@@ -43,8 +45,8 @@ A word of warning: when commiting and pushing your project to versioning servers
 
 ## What the project does not do for you
 
-It does not autoconfigure plugins on settings.toml yet. It doesn't force you to use pip, poetry or any other tool but flask and dynaconf on the Flask project created.
+It doesn't force you to use pip, poetry or any other tool but flask, toml and dynaconf on the Flask project created.
 
 ## Future
 
-Add more power to manage.py. Maybe autoconfigure plugins and blueprints on settings.toml.
+Add more power to manage.py; maybe database configuration and migrations.
