@@ -44,14 +44,14 @@ def runserver(port):
 
 @manage.command()
 @click.argument('name')
-@click.option('-t', '--templates', help="sets if the blueprint will use a private templates' directory.", is_flag=True)
+@click.option('-t', '--templates', help="sets if the blueprint will use a private templates' directory.", is_flag=True, default=False)
 def create_blueprint(name: str, templates: bool):
     '''Creates blueprint under blueprints directory and adds it to instance's settings.toml.'''
     os.mkdir(os.path.join(os.getcwd(), '{{name}}', 'blueprints', name))
     if templates:
         tf = os.path.join(os.getcwd(), '{{name}}', 'blueprints', name, 'templates', name)
         os.makedirs(tf)
-        click.echo(f"Place this blueprint's templates under {tf}")
+        click.echo(f"Placed this blueprint's templates under {tf}")
 
     env = Environment(
         loader=PackageLoader('flaskstarter', 'templates'),

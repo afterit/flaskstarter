@@ -4,7 +4,7 @@ from .views import root
 
 
 def create_app():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
     configuration.init_app(app)
 
     app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path,'uploads')
