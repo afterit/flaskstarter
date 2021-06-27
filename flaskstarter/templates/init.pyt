@@ -1,13 +1,14 @@
-import os
-
 from flask import Flask
 from {{name}}.ext import configuration
+from .views import root
+
 
 def create_app():
     app = Flask(__name__)
     configuration.init_app(app)
 
-    with app.app_context():
-        from . import views
-    
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path,'uploads')
+
+    app.add_url_rule('/', view_func=root)
+
     return app
