@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-{% if not template: %}
+{% if not templates: %}
 bp = Blueprint('{{name}}', __name__, url_prefix='/{{name}}')
 {% else: %}
 bp = Blueprint('{{name}}', __name__, url_prefix='/{{name}}', template_folder='templates')
