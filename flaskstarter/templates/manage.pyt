@@ -69,7 +69,7 @@ def plug_blueprint(name: str, templates: bool):
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     settings['default']['EXTENSIONS'].append(
-        f'{{name}}.blueprints.{name}.{name}')
+        f'{{name}}.blueprints.{name}.{name}:init_app')
     with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
         f.write(toml.dumps(settings))
 
@@ -107,7 +107,7 @@ def plug_database(name: str):
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     settings['default']['EXTENSIONS'].append(
-        f'{{name}}.ext.database')
+        f'{{name}}.ext.database:init_app')
     with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
         f.write(toml.dumps(settings))
 
