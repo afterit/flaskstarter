@@ -96,7 +96,7 @@ def plug_database(name: str):
         cmd = f'call {os.path.join(os.getcwd(), ".venv", "Scripts", "activate")}; pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
     subprocess.call(cmd, shell=True)
     # project.ext.database
-    with open(os.path.join(os.getcwd(), '{{name}}', 'ext', f'{name}.py'), 'w') as db_module:
+    with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
         db_template = env.get_template('database.pyt')
         db_module.write(db_template.render(name=name))
     # models.py (basic example)
