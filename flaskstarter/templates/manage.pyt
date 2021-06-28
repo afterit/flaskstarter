@@ -78,8 +78,7 @@ def plug_blueprint(name: str, templates: bool):
 
 
 @manage.command()
-@click.argument('name')
-def plug_database(name: str):
+def plug_database():
     '''Adds a basic set of models to project and let it ready for migrations. At the start it will be set to flask_sqlalchemy as ORM and sqlite as database, as well as use flask_migrate as migration tool.'''
     # setup tasks
     env = Environment(
