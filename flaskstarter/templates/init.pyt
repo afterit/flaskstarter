@@ -7,8 +7,6 @@ def create_app():
     app = Flask(__name__)
     configuration.init_app(app)
 
-    app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path,'uploads')
-
     app.add_url_rule('/', view_func=root)
 
     return app
