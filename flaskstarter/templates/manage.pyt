@@ -45,11 +45,12 @@ def runserver(port):
 @manage.command()
 @click.argument('name')
 @click.option('-t', '--templates', help="sets if the blueprint will use a private templates' directory.", is_flag=True, default=False)
-def create_blueprint(name: str, templates: bool):
+def plug_blueprint(name: str, templates: bool):
     '''Creates blueprint under blueprints directory and adds it to instance's settings.toml.'''
     os.mkdir(os.path.join(os.getcwd(), '{{name}}', 'blueprints', name))
     if templates:
-        tf = os.path.join(os.getcwd(), '{{name}}', 'blueprints', name, 'templates', name)
+        tf = os.path.join(
+            os.getcwd(), '{{name}}', 'blueprints', name, 'templates', name)
         os.makedirs(tf)
         click.echo(f"Placed this blueprint's templates under {tf}")
 
@@ -75,6 +76,40 @@ def create_blueprint(name: str, templates: bool):
     click.echo(
         'Blueprint created and registered on instance/settings.toml. Restart your app if running.')
 
+
+@manage.command()
+@click.argument('name')
+def plug_database(name: str):
+    '''Adds a basic set of models to project and let it ready for migrations. At the start it will be set to flask_sqlalchemy as ORM and sqlite as database, as well as use flask_migrate as migration tool.'''
+    # setup tasks
+    env = Environment(
+        loader=PackageLoader('flaskstarter', 'templates'),
+        autoescape=select_autoescape('pyt', 'htmlt')
+    )
+    # add and install requirements
+    with open('requirements.txt', 'a') as requirements:
+        requirements.write(f'flask-sqlalchemy{os.linesep}flask-migrate{os.linesep}')
+    cmd = ''
+    if os.name == 'posix':
+        cmd = f'. {os.path.join(os.getcwd(), ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+    elif os.name == 'nt':
+        cmd = f'call {os.path.join(os.getcwd(), ".venv", "Scripts", "activate")}; pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+    subprocess.call(cmd, shell=True)
+    # project.ext.database
+    with open(os.path.join(os.getcwd(), {{name}}, 'ext', f'{name}.py'), 'w') as db_module:
+        db_template = env.get_template('database.pyt')
+        db_module.write(db_template.render(name=name))
+    # models.py (basic example)
+    with open(os.path.join(os.getcwd(), {{name}}, 'models.py'), 'w') as models_file:
+        mod_template = env.get_template('models.pyt')
+        models_file.write(mod_template.render(project='{{name}}'))
+    # settings.toml
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    settings['default']['EXTENSIONS'].append(
+        f'{{name}}.ext.database')
+    with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
+        f.write(toml.dumps(settings))
 
 if __name__ == '__main__':
     manage(prog_name='manage')
