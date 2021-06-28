@@ -25,7 +25,7 @@ Now, after project creation, you can enter on its directory and make full use of
 
 By now you can create a blueprint structure by typing the bellow on project root:
 
-`$ python manage.py create-blueprint [blueprint_name]`
+`$ python manage.py plug-blueprint [blueprint_name]`
 
 If it will work as an API blueprint, that's enough. But maybe it is not and you want to use private templates related only to this blueprint. This is solved by adding a '-t' or '--templates' to the above command.
 
@@ -36,6 +36,12 @@ To run your app you can use the bellow on project root:
 `$ python manage.py runserver`
 
 Ask manage.py for runserver help to see its options.
+
+Now it is possible to plug a database and a migration extensions to the project. For a first experience Flaskstarter is running with flask-sqlalchemy and flask-migrate. The templates that generate the kickoff database use sqlite and the simplest thing possible. You will be able to plug a database by running:
+
+`$ python manage.py plug-database`
+
+For migrations, you'll have Flask-migrate interface for now, but remember to have your models connected to your app, maybe doing a simple import on the views file, or entities won't be added to database.
 
 ## What the project does for you
 
@@ -49,4 +55,4 @@ It doesn't force you to use pip, poetry or any other tool but flask, toml and dy
 
 ## Future
 
-Add more power to manage.py; maybe database configuration and migrations.
+Add more power to manage.py; maybe database configuration and migrations. (it is running but not fully tested)

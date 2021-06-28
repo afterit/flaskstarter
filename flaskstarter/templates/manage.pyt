@@ -88,7 +88,8 @@ def plug_database(name: str):
     )
     # add and install requirements
     with open('requirements.txt', 'a') as requirements:
-        requirements.write(f'flask-sqlalchemy{os.linesep}flask-migrate{os.linesep}')
+        requirements.write(
+            f'flask-sqlalchemy{os.linesep}flask-migrate{os.linesep}')
     cmd = ''
     if os.name == 'posix':
         cmd = f'. {os.path.join(os.getcwd(), ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
@@ -98,7 +99,7 @@ def plug_database(name: str):
     # project.ext.database
     with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
         db_template = env.get_template('database.pyt')
-        db_module.write(db_template.render(name=name))
+        db_module.write(db_template.render(name={{name}}))
     # models.py (basic example)
     with open(os.path.join(os.getcwd(), '{{name}}', 'models.py'), 'w') as models_file:
         mod_template = env.get_template('models.pyt')
@@ -110,6 +111,8 @@ def plug_database(name: str):
         f'{{name}}.ext.database:init_app')
     with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
         f.write(toml.dumps(settings))
+    click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")
+
 
 if __name__ == '__main__':
     manage(prog_name='manage')
