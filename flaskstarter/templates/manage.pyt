@@ -22,7 +22,7 @@ import os
 import subprocess
 import toml
 
-from jinja2 import Environment, PackageLoader, select_autoescape
+from flaskstarter.tools.templating import get_template
 
 
 @click.group()
@@ -54,15 +54,11 @@ def plug_blueprint(name: str, templates: bool):
         os.makedirs(tf)
         click.echo(f"Placed this blueprint's templates under {tf}")
 
-    env = Environment(
-        loader=PackageLoader('flaskstarter', 'templates'),
-        autoescape=select_autoescape('pyt', 'htmlt')
-    )
     init = open(os.path.join(
         os.getcwd(), '{{name}}', 'blueprints', name, '__init__.py'), 'w')
     init.close()
     with open(os.path.join(os.getcwd(), '{{name}}', 'blueprints', name, f'{name}.py'), 'w') as blueprint:
-        bluet = env.get_template('blueprint.pyt')
+        bluet = get_template('blueprint.pyt')
         blueprint.write(bluet.render(
             name=name, templates=templates))
 
@@ -81,10 +77,12 @@ def plug_blueprint(name: str, templates: bool):
 def plug_database():
     '''Adds a basic set of models to project and let it ready for migrations. At the start it will be set to flask_sqlalchemy as ORM and sqlite as database, as well as use flask_migrate as migration tool.'''
     # setup tasks
-    env = Environment(
-        loader=PackageLoader('flaskstarter', 'templates'),
-        autoescape=select_autoescape('pyt', 'htmlt')
-    )
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if '{{name}}.ext.database:init_app' in settings['default']['EXTENSIONS']:
+        click.echo('Database seems to be already plugged.')
+        exit(0)
+
     # add and install requirements
     with open('requirements.txt', 'a') as requirements:
         requirements.write(
@@ -97,17 +95,17 @@ def plug_database():
     subprocess.call(cmd, shell=True)
     # project.ext.database
     with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
-        db_template = env.get_template('database.pyt')
+        db_template = get_template('database.pyt')
         db_module.write(db_template.render(name={{name}}))
     # models.py (basic example)
     with open(os.path.join(os.getcwd(), '{{name}}', 'models.py'), 'w') as models_file:
-        mod_template = env.get_template('models.pyt')
+        mod_template = get_template('models.pyt')
         models_file.write(mod_template.render(project='{{name}}'))
     # settings.toml
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     settings['default']['EXTENSIONS'].append(
-        f'{{name}}.ext.database:init_app')
+        '{{name}}.ext.database:init_app')
     with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
         f.write(toml.dumps(settings))
     click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")

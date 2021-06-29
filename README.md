@@ -1,4 +1,7 @@
 # flaskstarter
+
+![](https://img.shields.io/pypi/l/flaskstarter) ![](https://img.shields.io/pypi/v/flaskstarter) ![](https://img.shields.io/pypi/wheel/flaskstarter) 
+
 A Flask project start-up CLI to create modular ready projects.
 
 Flaskstarter assumes you know about Flask microframework and its mechanics in a begginer level. It can be really helpfull if you are still using monolithic aproach, and needs to start using a modular architecture.

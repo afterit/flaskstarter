@@ -17,10 +17,8 @@ import click
 import os
 import subprocess
 
-from jinja2 import Environment, PackageLoader, select_autoescape
-
 from flaskstarter.tools.requirements import add_support_to, install_requirements
-
+from flaskstarter.tools.templating import get_template
 
 def print_version(ctx, param, value):
     """Prints CLI version on 'flaskstarter --version'.
@@ -80,10 +78,7 @@ def init(name: str):
     click.echo('Done!')
 
     click.echo('Creating first python scripts and configurations... ')
-    env = Environment(
-        loader=PackageLoader('flaskstarter', 'templates'),
-        autoescape=select_autoescape('pyt', 'htmlt')
-    )
+    
 
     templates_and_dest = {
        'init.pyt':  os.path.join(os.getcwd(), name, name, '__init__.py'),
@@ -96,7 +91,7 @@ def init(name: str):
 
     for template, destination in templates_and_dest.items():
         with open(destination, 'w') as f:
-            template_file = env.get_template(template)
+            template_file = get_template(template)
             f.write(template_file.render(name=name))
 
     click.echo('Done!')
