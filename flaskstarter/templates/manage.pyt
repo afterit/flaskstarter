@@ -96,7 +96,7 @@ def plug_database():
     # project.ext.database
     with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
         db_template = get_template('database.pyt')
-        db_module.write(db_template.render(name={{name}}))
+        db_module.write(db_template.render(name='{{name}}'))
     # models.py (basic example)
     with open(os.path.join(os.getcwd(), '{{name}}', 'models.py'), 'w') as models_file:
         mod_template = get_template('models.pyt')
@@ -106,6 +106,8 @@ def plug_database():
         os.getcwd(), 'instance', 'settings.toml'))
     settings['default']['EXTENSIONS'].append(
         '{{name}}.ext.database:init_app')
+    settings['default']['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+os.path.join(
+        os.getcwd(), 'instance', 'db.sqlite3')
     with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
         f.write(toml.dumps(settings))
     click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")
