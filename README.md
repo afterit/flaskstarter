@@ -10,7 +10,7 @@ It also assumes you are using Python 3.6+.
 
 To install flaskstarter use the usual:
 
-`pip install flaskstarter --require-hashes`
+`pip install flaskstarter`
 
 To see its help:
 
