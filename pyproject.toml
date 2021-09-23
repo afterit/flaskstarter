@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flaskstarter"
-version = "0.3.1"
+version = "0.3.2"
 description = "A Flask project start-up CLI to create a modular ready projects."
 authors = ["Felipe Bastos Nunes <felipe.bastosn@gmail.com>"]
 license = "Apache-2.0"

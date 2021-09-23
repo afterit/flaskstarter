@@ -20,4 +20,4 @@ migrate = Migrate()
 
 def init_app(app : Flask) -> NoReturn:
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=True)
