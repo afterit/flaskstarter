@@ -44,7 +44,23 @@ Now it is possible to plug a database and a migration extensions to the project.
 
 `$ python manage.py plug-database`
 
-For migrations, you'll have Flask-migrate interface for now, but remember to have your models connected to your app, maybe doing a simple import on the views file, or entities won't be added to database.
+When plug-database is ran, the manage script will create the migrations folder as 
+Alembic requires. Once it is created the following commands will be available.
+
+This will generate a migration script with Example as message:
+
+`$ python manage.py db-migrate Example`
+
+This upgrades the database:
+
+`$ python manage.py db-upgrade`
+
+If anything undesirable happens, this will downgrade the database:
+
+`$ python manage.py db-downgrade`
+
+For other Flask-Migrate commands, you can export FLASK_APP on your shell and use
+flask db (command) as its documentation guides.
 
 ## What the project does for you
 
@@ -54,8 +70,9 @@ A word of warning: when commiting and pushing your project to versioning servers
 
 ## What the project does not do for you
 
-It doesn't force you to use pip, poetry or any other tool but flask, toml and dynaconf on the Flask project created.
+It doesn't force you to use poetry or any other tool but flask, toml and dynaconf on the Flask project created.
 
 ## Future
 
-Add more power to manage.py; maybe database configuration and migrations. (it is running but not fully tested)
+- Add automated tests for development enviroment on flaskstarter
+- Work on a better architecture for the generated project

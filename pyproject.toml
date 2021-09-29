@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flaskstarter"
-version = "0.3.2"
+version = "0.4"
 description = "A Flask project start-up CLI to create a modular ready projects."
 authors = ["Felipe Bastos Nunes <felipe.bastosn@gmail.com>"]
 license = "Apache-2.0"
@@ -27,6 +27,9 @@ MarkupSafe = "2.0.1"
 pytest = "6.2.4"
 autopep8 = "1.5.7"
 pylint = "2.8.3"
+Flask = "^2.0.1"
+Flask-Migrate = "^3.1.0"
+dynaconf = "^3.1.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

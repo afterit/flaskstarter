@@ -32,7 +32,7 @@ def print_version(ctx, param, value):
     """
     if not value or ctx.resilient_parsing:
         return
-    click.echo(f'flaskstarter 0.3.2')
+    click.echo(f'flaskstarter 0.4')
     ctx.exit()
 
 

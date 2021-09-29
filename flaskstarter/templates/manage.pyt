@@ -110,7 +110,59 @@ def plug_database():
         os.getcwd(), 'instance', 'db.sqlite3')
     with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
         f.write(toml.dumps(settings))
+
+    click.echo('Creating migrations directory')
+    cmd = ''
+    if os.name == 'posix':
+        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}; export FLASK_ENV=development; flask db init'
+    elif os.name == 'nt':
+        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}; set FLASK_ENV=development; flask db init'
+    subprocess.run(cmd, shell=True)
+    
     click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")
+
+
+@manage.command()
+@click.argument('message')
+def db_migrate(message):
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if '{{name}}.ext.database:init_app' not in settings['default']['EXTENSIONS']:
+        click.echo('No database plugged.')
+        exit(0)
+    from flask_migrate import migrate
+    from {{name}} import create_app
+    app = create_app()
+    with app.app_context():
+        migrate(message=message)
+
+
+@manage.command()
+def db_upgrade():
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if '{{name}}.ext.database:init_app' not in settings['default']['EXTENSIONS']:
+        click.echo('No database plugged.')
+        exit(0)
+    from flask_migrate import upgrade
+    from {{name}} import create_app
+    app = create_app()
+    with app.app_context():
+        upgrade()
+
+
+@manage.command()
+def db_downgrade():
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if '{{name}}.ext.database:init_app' not in settings['default']['EXTENSIONS']:
+        click.echo('No database plugged.')
+        exit(0)
+    from flask_migrate import downgrade
+    from {{name}} import create_app
+    app = create_app()
+    with app.app_context():
+        downgrade()
 
 
 if __name__ == '__main__':
