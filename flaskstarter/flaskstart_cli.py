@@ -63,9 +63,7 @@ def init(name: str):
         click.echo(f'Project with name "{name}" already exists. Exiting.')
         exit(0)
 
-    app_is_package = open(os.path.join(
-        os.getcwd(), name, name, '__init__.py'), 'w')
-    app_is_package.close()
+    
     os.makedirs(os.path.join(os.getcwd(), name, name, 'ext'))
     ext_is_package = open(os.path.join(
         os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
@@ -74,6 +72,9 @@ def init(name: str):
     blueprint_is_package = open(os.path.join(
         os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
     blueprint_is_package.close()
+    app_is_package = open(os.path.join(
+        os.getcwd(), name, name, '__init__.py'), 'w')
+    app_is_package.close()
 
     os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
     os.makedirs(os.path.join(os.getcwd(), name, name, 'static'))
