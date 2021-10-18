@@ -114,7 +114,7 @@ def init(name: str):
     add_support_to(name, 'Flask==2.0.2')
     add_support_to(name, 'dynaconf==3.1.7')
     add_support_to(name, 'toml')
-    add_support_to(name, 'flaskstarter==0.4')
+    add_support_to(name, f'flaskstarter=={__version__}')
 
     click.echo('If you do have other requirements, feel free to customize it.')
 
