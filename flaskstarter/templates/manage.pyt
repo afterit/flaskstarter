@@ -36,9 +36,9 @@ def runserver(port):
     '''Run Flask server on development mode and selected TCP port.'''
     cmd = ''
     if os.name == 'posix':
-        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}; export FLASK_ENV=development; flask run --port={port}'
+        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask run --port={port}'
     elif os.name == 'nt':
-        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}; set FLASK_ENV=development; flask run --port={port}'
+        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask run --port={port}'
     subprocess.run(cmd, shell=True)
 
 

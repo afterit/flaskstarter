@@ -13,9 +13,11 @@
    limitations under the License.
 """
 
-import click
 import os
 import subprocess
+import click
+
+from flaskstarter import __version__
 
 from flaskstarter.tools.requirements import add_support_to, install_requirements
 from flaskstarter.tools.templating import get_template
@@ -32,7 +34,7 @@ def print_version(ctx, param, value):
     """
     if not value or ctx.resilient_parsing:
         return
-    click.echo(f'flaskstarter 0.4')
+    click.echo(f'flaskstarter {__version__}')
     ctx.exit()
 
 
@@ -61,6 +63,9 @@ def init(name: str):
         click.echo(f'Project with name "{name}" already exists. Exiting.')
         exit(0)
 
+    app_is_package = open(os.path.join(
+        os.getcwd(), name, name, '__init__.py'), 'w')
+    app_is_package.close()
     os.makedirs(os.path.join(os.getcwd(), name, name, 'ext'))
     ext_is_package = open(os.path.join(
         os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
@@ -81,7 +86,7 @@ def init(name: str):
     
 
     templates_and_dest = {
-       'init.pyt':  os.path.join(os.getcwd(), name, name, '__init__.py'),
+       'app.pyt':  os.path.join(os.getcwd(), name, name, 'app.py'),
        'views.pyt': os.path.join(os.getcwd(), name, name, 'views.py'),
        'index.htmlt': os.path.join(os.getcwd(), name, name, 'templates', 'index.html'),
        'configuration.pyt': os.path.join(os.getcwd(), name, name, 'ext', 'configuration.py'),
@@ -105,10 +110,10 @@ def init(name: str):
     click.echo('Done!')
 
     # Requirements will help you do the basic startup of your virtualenv.
-    add_support_to(name, 'flask')
-    add_support_to(name, 'dynaconf')
+    add_support_to(name, 'Flask==2.0.2')
+    add_support_to(name, 'dynaconf==3.1.7')
     add_support_to(name, 'toml')
-    add_support_to(name, 'flaskstarter')
+    add_support_to(name, 'flaskstarter==0.4')
 
     click.echo('If you do have other requirements, feel free to customize it.')
 

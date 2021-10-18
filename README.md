@@ -76,3 +76,7 @@ It doesn't force you to use poetry or any other tool but flask, toml and dynacon
 
 - Add automated tests for development enviroment on flaskstarter
 - Work on a better architecture for the generated project
+
+## How can you help on flaskstarter development?
+
+Feel free to clone it and send us pull requests! Remember to comment the decisions you make so they can be better reviewed.
