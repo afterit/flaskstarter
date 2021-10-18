@@ -114,9 +114,9 @@ def plug_database():
     click.echo('Creating migrations directory')
     cmd = ''
     if os.name == 'posix':
-        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}; export FLASK_ENV=development; flask db init'
+        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask db init'
     elif os.name == 'nt':
-        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}; set FLASK_ENV=development; flask db init'
+        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask db init'
     subprocess.run(cmd, shell=True)
     
     click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")
