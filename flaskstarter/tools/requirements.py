@@ -13,9 +13,9 @@
    limitations under the License.
 """
 
-import click
 import os
 import subprocess
+import click
 
 
 def add_support_to(name, module):
@@ -33,7 +33,7 @@ def add_support_to(name, module):
         click.echo(f'Adding {module} support... ')
         requirements.write(f'{module}{os.linesep}')
         click.echo('Done!')
-    except:
+    except FileNotFoundError:
         click.echo(f"Couldn't create requirements.txt on {name}")
     finally:
         requirements.close()
