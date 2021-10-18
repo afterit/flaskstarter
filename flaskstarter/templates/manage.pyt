@@ -131,7 +131,7 @@ def db_migrate(message):
         click.echo('No database plugged.')
         exit(0)
     from flask_migrate import migrate
-    from {{name}} import create_app
+    from {{name}}.app import create_app
     app = create_app()
     with app.app_context():
         migrate(message=message)
@@ -145,7 +145,7 @@ def db_upgrade():
         click.echo('No database plugged.')
         exit(0)
     from flask_migrate import upgrade
-    from {{name}} import create_app
+    from {{name}}.app import create_app
     app = create_app()
     with app.app_context():
         upgrade()
@@ -159,7 +159,7 @@ def db_downgrade():
         click.echo('No database plugged.')
         exit(0)
     from flask_migrate import downgrade
-    from {{name}} import create_app
+    from {{name}}.app import create_app
     app = create_app()
     with app.app_context():
         downgrade()
