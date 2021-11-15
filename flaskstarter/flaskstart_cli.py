@@ -79,7 +79,6 @@ def init(name: str):
     os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
     os.makedirs(os.path.join(os.getcwd(), name, name, 'static'))
 
-    os.mkdir(os.path.join(os.getcwd(), name, '.venv'))
     os.makedirs(os.path.join(os.getcwd(), name, 'instance', 'uploads'))
     click.echo('Done!')
 
@@ -102,14 +101,6 @@ def init(name: str):
 
     click.echo('Done!')
 
-    # Clonning project's own virtualenv
-    click.echo(
-        "ATTENTION: if this next stage fails, you should check if you do have venv on your system's Python.")
-    click.echo('Clonning python onto its own virtual enviroment... ')
-    subprocess.run(
-        f'python3 -m venv {os.path.join(os.getcwd(), name, ".venv")}', shell=True)
-    click.echo('Done!')
-
     # Requirements will help you do the basic startup of your virtualenv.
     add_support_to(name, 'Flask==2.0.2')
     add_support_to(name, 'dynaconf==3.1.7')
@@ -118,8 +109,6 @@ def init(name: str):
 
     click.echo('If you do have other requirements, feel free to customize it.')
 
-    click.echo('I will install the requirements for you.')
-    install_requirements(name)
     click.echo('Done!')
 
     return 0
