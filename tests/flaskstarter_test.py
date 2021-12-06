@@ -7,7 +7,7 @@ def test_fixture_exist(teste):
     Args:
         teste (pytest fixture): A test fixture.
     """
-    assert teste == 'oi'
+    assert teste == "oi"
 
 
 def test_create_tempdir(testing_directory):
@@ -16,5 +16,5 @@ def test_create_tempdir(testing_directory):
     Args:
         testing_directory ([type]): [description]
     """
-    os.mkdir(os.path.join(testing_directory, 'pasta'))
+    os.mkdir(os.path.join(testing_directory, "pasta"))
     assert True

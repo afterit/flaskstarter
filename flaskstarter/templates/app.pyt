@@ -3,7 +3,7 @@ from {{name}}.ext import configuration
 from .views import root
 
 
-def create_app():
+def create_app() -> Flask:
     app = Flask(__name__)
     configuration.init_app(app)
 

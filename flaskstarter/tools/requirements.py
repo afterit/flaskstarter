@@ -18,23 +18,21 @@ import subprocess
 import click
 
 
-def add_support_to(name, module):
+def add_support_to(module):
     """Writes down the module name on project's requirements.txt.
 
     Warning: called only on project's creation time.
 
     Args:
-        name (string): Project's name.
         module (string): Library to add to requirements.txt.
     """
     try:
-        requirements = open(os.path.join(
-            os.getcwd(), name, 'requirements.txt'), 'a')
-        click.echo(f'Adding {module} support... ')
-        requirements.write(f'{module}{os.linesep}')
-        click.echo('Done!')
+        requirements = open(os.path.join(os.getcwd(), "requirements.txt"), "a")
+        click.echo(f"Adding {module} support... ", nl=False)
+        requirements.write(f"{module}{os.linesep}")
+        click.echo("Done!")
     except FileNotFoundError:
-        click.echo(f"Couldn't create requirements.txt on {name}")
+        click.echo(f"Couldn't create requirements.txt.")
     finally:
         requirements.close()
 
@@ -47,9 +45,9 @@ def install_requirements(name):
     Args:
         name (string): Project's name.
     """
-    cmd = ''
-    if os.name == 'posix':
+    cmd = ""
+    if os.name == "posix":
         cmd = f'. {os.path.join(os.getcwd(), name, ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), name, "requirements.txt")};'
-    elif os.name == 'nt':
+    elif os.name == "nt":
         cmd = f'call {os.path.join(os.getcwd(), name, ".venv", "Scripts", "activate")}; pip install -r {os.path.join(os.getcwd(), name, "requirements.txt")};'
     subprocess.call(cmd, shell=True)
