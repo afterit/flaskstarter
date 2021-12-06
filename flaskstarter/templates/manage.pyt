@@ -36,9 +36,9 @@ def runserver(port):
     '''Run Flask server on development mode and selected TCP port.'''
     cmd = ''
     if os.name == 'posix':
-        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask run --port={port}'
+        cmd = f'export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask run --port={port}'
     elif os.name == 'nt':
-        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask run --port={port}'
+        cmd = f'set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask run --port={port}'
     subprocess.run(cmd, shell=True)
 
 
@@ -89,9 +89,9 @@ def plug_database():
             f'flask-sqlalchemy{os.linesep}flask-migrate{os.linesep}')
     cmd = ''
     if os.name == 'posix':
-        cmd = f'. {os.path.join(os.getcwd(), ".venv", "bin", "activate")}; pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+        cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
     elif os.name == 'nt':
-        cmd = f'call {os.path.join(os.getcwd(), ".venv", "Scripts", "activate")}; pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+        cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
     subprocess.call(cmd, shell=True)
     # project.ext.database
     with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
@@ -114,9 +114,9 @@ def plug_database():
     click.echo('Creating migrations directory')
     cmd = ''
     if os.name == 'posix':
-        cmd = f'. .venv/bin/activate; export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask db init'
+        cmd = f'export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask db init'
     elif os.name == 'nt':
-        cmd = f'call .venv/Scripts/activate; set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask db init'
+        cmd = f'set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask db init'
     subprocess.run(cmd, shell=True)
     
     click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")

@@ -4,27 +4,40 @@
 
 A Flask project start-up CLI to create modular ready projects.
 
-Flaskstarter assumes you know about Flask microframework and its mechanics in a begginer level. It can be really helpfull if you are still using monolithic aproach, and needs to start using a modular architecture.
+Flaskstarter assumes you know about Flask microframework and its mechanics in a begginer level. It can be really helpful if you are still using monolithic aproach, and needs to start using a modular architecture.
 
 It also assumes you are using Python 3.6+.
+
+> Flaskstarter recommends the use of a python virtual environment for project
+> to work safely and isolated from your systems binnaries. Activate it before
+> the next steps.
 
 To install flaskstarter use the usual:
 
 `pip install flaskstarter`
 
+To see its version:
+
+`flaskstarter --version`
+
 To see its help:
 
 `flaskstarter --help`
 
-To start a project:
+To start a project, create its folder and:
 
-`flaskstarter init project_name`
+`flaskstarter init main_module_name`
+
+If you do want to use the same project's root folder as main module name:
+
+`flaskstarter init .`
 
 To see init's help:
 
 `flaskstarter init --help`
 
-Now, after project creation, you can enter on its directory and make full use of manage.py, a script with a CLI that may help you to automate some tasks inside project tree.
+Now, after project creation, you can  make full use of manage.py, a script
+with a CLI that may help you to automate some tasks inside project tree.
 
 By now you can create a blueprint structure by typing the bellow on project root:
 
@@ -74,8 +87,9 @@ It doesn't force you to use poetry or any other tool but flask, toml and dynacon
 
 ## Future
 
-- Add automated tests for development enviroment on flaskstarter
+- Add automated tests for development enviroment of flaskstarter
 - Work on a better architecture for the generated project
+- Start new extensions by manage.py creating an empty skeleton
 
 ## How can you help on flaskstarter development?
 

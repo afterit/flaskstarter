@@ -14,105 +14,103 @@
 """
 
 import os
-import subprocess
 import click
 
 from flaskstarter import __version__
 
-from flaskstarter.tools.requirements import add_support_to, install_requirements
+from flaskstarter.tools.requirements import add_support_to
 from flaskstarter.tools.templating import get_template
-
-def print_version(ctx, param, value):
-    """Prints CLI version on 'flaskstarter --version'.
-
-    Explained on Click documentation as a pattern to attend --version.
-
-    Args:
-        ctx ([type]): Checks Click's documentation.
-        param ([type]): Checks Click's documentation.
-        value ([type]): Checks Click's documentation.
-    """
-    if not value or ctx.resilient_parsing:
-        return
-    click.echo(f'flaskstarter {__version__}')
-    ctx.exit()
 
 
 @click.group()
-@click.option('--version', is_flag=True, default=False, callback=print_version,
-              expose_value=False, is_eager=True)
+@click.version_option(version=f"{__version__}")
 def flaskstarter():
     """A program to start a Flask project under a modular structure."""
 
 
 @flaskstarter.command()
-@click.argument('name')
+@click.argument(
+    "name",
+)
 def init(name: str):
-    """Creates the project directory tree under the name provided.
+    """Creates the project's source tree.
 
     Args:
-        name (str): Project's name to create.
+        name (str): Project's main package's name to create. If it's a dot, will use current
+                    directory as project's name.
 
     """
-
     # All directories and basic python files are created here
-    click.echo('Creating project tree... ')
+    click.echo("Creating project's source tree... ", nl=False)
+
+    if name == ".":
+        name = os.path.split(os.getcwd())[1]
+
     try:
         os.mkdir(os.path.join(os.getcwd(), name))
     except FileExistsError:
-        click.echo(f'Project with name "{name}" already exists. Exiting.')
+        click.echo(
+            f'Project or module with name "{name}" already exists. Exiting.'
+        )
         exit(0)
 
-    
-    os.makedirs(os.path.join(os.getcwd(), name, name, 'ext'))
-    ext_is_package = open(os.path.join(
-        os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
+    os.makedirs(os.path.join(os.getcwd(), name, "ext"))
+    ext_is_package = open(
+        os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w"
+    )
     ext_is_package.close()
-    os.makedirs(os.path.join(os.getcwd(), name, name, 'blueprints'))
-    blueprint_is_package = open(os.path.join(
-        os.getcwd(), name, name, 'ext', '__init__.py'), 'w')
+    os.makedirs(os.path.join(os.getcwd(), name, "blueprints"))
+    blueprint_is_package = open(
+        os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w"
+    )
     blueprint_is_package.close()
-    app_is_package = open(os.path.join(
-        os.getcwd(), name, name, '__init__.py'), 'w')
+    app_is_package = open(os.path.join(os.getcwd(), name, "__init__.py"), "w")
     app_is_package.close()
 
-    os.makedirs(os.path.join(os.getcwd(), name, name, 'templates'))
-    os.makedirs(os.path.join(os.getcwd(), name, name, 'static'))
+    os.makedirs(os.path.join(os.getcwd(), name, "templates"))
+    os.makedirs(os.path.join(os.getcwd(), name, "static"))
 
-    os.makedirs(os.path.join(os.getcwd(), name, 'instance', 'uploads'))
-    click.echo('Done!')
+    os.makedirs(os.path.join(os.getcwd(), "instance", "uploads"))
+    click.echo("Done!")
 
-    click.echo('Creating first python scripts and configurations... ')
-    
+    click.echo("Creating first python scripts and configurations... ", nl=False)
 
     templates_and_dest = {
-       'app.pyt':  os.path.join(os.getcwd(), name, name, 'app.py'),
-       'views.pyt': os.path.join(os.getcwd(), name, name, 'views.py'),
-       'index.htmlt': os.path.join(os.getcwd(), name, name, 'templates', 'index.html'),
-       'configuration.pyt': os.path.join(os.getcwd(), name, name, 'ext', 'configuration.py'),
-       'settings.tomlt': os.path.join(os.getcwd(), name, 'instance', 'settings.toml'),
-       'manage.pyt': os.path.join(os.getcwd(), name, 'manage.py')
+        "app.pyt": os.path.join(os.getcwd(), name, "app.py"),
+        "views.pyt": os.path.join(os.getcwd(), name, "views.py"),
+        "index.htmlt": os.path.join(
+            os.getcwd(), name, "templates", "index.html"
+        ),
+        "configuration.pyt": os.path.join(
+            os.getcwd(), name, "ext", "configuration.py"
+        ),
+        "settings.tomlt": os.path.join(
+            os.getcwd(), "instance", "settings.toml"
+        ),
+        "manage.pyt": os.path.join(os.getcwd(), "manage.py"),
     }
 
     for template, destination in templates_and_dest.items():
-        with open(destination, 'w') as f:
+        with open(destination, "w") as f:
             template_file = get_template(template)
             f.write(template_file.render(name=name))
 
-    click.echo('Done!')
+    click.echo("Done!")
 
     # Requirements will help you do the basic startup of your virtualenv.
-    add_support_to(name, 'Flask==2.0.2')
-    add_support_to(name, 'dynaconf==3.1.7')
-    add_support_to(name, 'toml')
-    add_support_to(name, f'flaskstarter=={__version__}')
+    add_support_to("Flask==2.0.2")
+    add_support_to("dynaconf==3.1.7")
+    add_support_to("toml")
+    add_support_to(f"flaskstarter=={__version__}")
 
-    click.echo('If you do have other requirements, feel free to customize it.')
+    click.echo("If you do have other requirements, feel free to customize it.")
 
-    click.echo('Done!')
+    click.echo("Project created!")
 
     return 0
 
 
-if __name__ == '__main__':
-    flaskstarter(prog_name='flaskstarter')  # pylint: disable=unexpected-keyword-arg
+if __name__ == "__main__":
+    flaskstarter(
+        prog_name="flaskstarter"
+    )  # pylint: disable=unexpected-keyword-arg
