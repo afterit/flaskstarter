@@ -1,12 +1,11 @@
-import os
+{% extends 'ext.pyt' %}
+
+{% block imports %}
 from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-
-from typing import NoReturn
-from flask import Flask
-
-
+{% endblock %}
+{% block globalobjects %}
 convention = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -17,7 +16,8 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(metadata=metadata)
 migrate = Migrate()
-
-def init_app(app : Flask) -> NoReturn:
+{% endblock %}
+{% block inits %}
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
+{% endblock %}

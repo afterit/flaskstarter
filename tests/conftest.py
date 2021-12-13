@@ -1,13 +1,6 @@
-from _pytest.fixtures import fail_fixturefunc
 import pytest
 import os
 import shutil
-
-
-@pytest.fixture(scope="module")
-def teste():
-    """Just to test if fixtures are present and working"""
-    return "oi"
 
 
 @pytest.fixture(scope="module")
