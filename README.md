@@ -45,7 +45,14 @@ By now you can create a blueprint structure by typing the bellow on project root
 
 If it will work as an API blueprint, that's enough. But maybe it is not and you want to use private templates related only to this blueprint. This is solved by adding a '-t' or '--templates' to the above command.
 
-After that, remember to go onto app init file to register the blueprint on it. There is an EXTENSIONS variable where you can list all the plugins to autoimport. It uses factory design.
+After that, flaskstarter goes onto instance/settings.toml file to register the blueprint on it. There is an EXTENSIONS variable where you can list all the plugins to autoimport if you create any by hand. It uses factory design.
+
+Most of the times you are adding some extensions and middlewares to your app, so
+you can add an empty skelleton to instanciate and plug to app by typing:
+
+`$ python manage.py plug-extension [name]`
+
+As with blueprints, flaskstarter registers extensions on instance/settings.
 
 To run your app you can use the bellow on project root:
 
