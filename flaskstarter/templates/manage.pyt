@@ -44,9 +44,34 @@ def runserver(port):
 
 @manage.command()
 @click.argument('name')
+def plug_extension(name: str):
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if f'{{name}}.ext.{name}:init_app' in settings['default']['EXTENSIONS']:
+        click.echo('An extension with such a name seems to be already plugged.')
+        exit(0)
+    # project.ext.database
+    with open(os.path.join(os.getcwd(), '{{name}}', 'ext', f'{name}.py'), 'w') as new_extension:
+        ext_template = get_template('ext.pyt')
+        new_extension.write(ext_template.render())
+
+    settings['default']['EXTENSIONS'].append(
+        f'{{name}}.ext.{name}:init_app')
+    with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
+        f.write(toml.dumps(settings))
+    
+    click.echo('Extension added and configured. Remember to code it, as it is just a skeleton.')
+
+@manage.command()
+@click.argument('name')
 @click.option('-t', '--templates', help="sets if the blueprint will use a private templates' directory.", is_flag=True, default=False)
 def plug_blueprint(name: str, templates: bool):
     '''Creates blueprint under blueprints directory and adds it to instance's settings.toml.'''
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if f'{{name}}.blueprints.{name}.{name}:init_app' in settings['default']['EXTENSIONS']:
+        click.echo('A blueprint with such a name seems to be already plugged.')
+        exit(0)
     os.mkdir(os.path.join(os.getcwd(), '{{name}}', 'blueprints', name))
     if templates:
         tf = os.path.join(
