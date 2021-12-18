@@ -37,9 +37,10 @@ def runserver(port):
     cmd = ''
     if os.name == 'posix':
         cmd = f'export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask run --port={port}'
+        subprocess.run(cmd, shell=True)
     elif os.name == 'nt':
-        cmd = f'set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask run --port={port}'
-    subprocess.run(cmd, shell=True)
+        cmd = f'$env:FLASK_APP = "teste.app"; $env:FLASK_ENV = "development"; flask run --port={port}'
+        subprocess.run(["powershell", "-Command", cmd])
 
 
 @manage.command()
@@ -115,9 +116,10 @@ def plug_database():
     cmd = ''
     if os.name == 'posix':
         cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+        subprocess.call(cmd, shell=True)
     elif os.name == 'nt':
         cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
-    subprocess.call(cmd, shell=True)
+        subprocess.run(['powershell', '-Command', cmd])
     # project.ext.database
     with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
         db_template = get_template('database.pyt')
@@ -140,9 +142,10 @@ def plug_database():
     cmd = ''
     if os.name == 'posix':
         cmd = f'export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask db init'
+        subprocess.run(cmd, shell=True)
     elif os.name == 'nt':
-        cmd = f'set FLASK_APP={{name}}.app; set FLASK_ENV=development; flask db init'
-    subprocess.run(cmd, shell=True)
+        cmd = f'$env:FLASK_APP = "{{name}}.app"; $env:FLASK_ENV = "development"; flask db init'
+        subprocess.run(['powershell', '-Command', cmd])
     
     click.echo("Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app.")
 
