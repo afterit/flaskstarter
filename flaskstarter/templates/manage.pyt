@@ -193,5 +193,46 @@ def db_downgrade():
         downgrade()
 
 
+@manage.command()
+def plug_auth():
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    if '{{name}}.ext.auth:init_app' in settings['default']['EXTENSIONS']:
+        click.echo('Authentication seems to be already plugged.')
+        exit(0)
+
+    # add and install requirements
+    with open('requirements.txt', 'a') as requirements:
+        requirements.write(
+            f'flask-login{os.linesep}')
+    cmd = ''
+    if os.name == 'posix':
+        cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+        subprocess.call(cmd, shell=True)
+    elif os.name == 'nt':
+        cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
+        subprocess.run(['powershell', '-Command', cmd])
+
+    # project.ext.auth
+    with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'auth.py'), 'w') as db_module:
+        db_template = get_template('auth.pyt')
+        db_module.write(db_template.render(name='{{name}}'))
+
+    # settings.toml
+    settings = toml.load(os.path.join(
+        os.getcwd(), 'instance', 'settings.toml'))
+    settings['default']['EXTENSIONS'].append(
+        '{{name}}.ext.auth:init_app')
+    with open(os.path.join(os.getcwd(), 'instance', 'settings.toml'), 'w') as f:
+        f.write(toml.dumps(settings))
+
+    plug_blueprint('auth', False)
+
+    with open(os.path.join(os.getcwd(), '{{name}}', 'blueprints', 'auth', 'model.py'), 'w') as auth_model:
+        auth_model_template = get_template('auth_model.pyt')
+        auth_model.write(auth_model_template.render(project='{{name}}'))
+
+    click.echo('Authentication structure ready for use. Make sure you have modified for your needs.')
+
 if __name__ == '__main__':
     manage(prog_name='manage')
