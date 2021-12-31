@@ -39,7 +39,7 @@ def runserver(port):
         cmd = f'export FLASK_APP={{name}}.app; export FLASK_ENV=development; flask run --port={port}'
         subprocess.run(cmd, shell=True)
     elif os.name == 'nt':
-        cmd = f'$env:FLASK_APP = "teste.app"; $env:FLASK_ENV = "development"; flask run --port={port}'
+        cmd = f'$env:FLASK_APP = "{{name}}.app"; $env:FLASK_ENV = "development"; flask run --port={port}'
         subprocess.run(["powershell", "-Command", cmd])
 
 
