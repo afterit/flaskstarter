@@ -18,6 +18,7 @@ import subprocess
 import click
 
 
+@DeprecationWarning
 def add_support_to(module):
     """Writes down the module name on project's requirements.txt.
 
@@ -37,6 +38,7 @@ def add_support_to(module):
         requirements.close()
 
 
+@DeprecationWarning
 def install_requirements(name):
     """Installs the requirements.txt on destination project's virtual environment.
 
