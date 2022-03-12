@@ -1,4 +1,4 @@
-# flaskstarter
+# flaskstarter 0.5.3
 
 ![](https://img.shields.io/pypi/l/flaskstarter) ![](https://img.shields.io/pypi/v/flaskstarter) ![](https://img.shields.io/pypi/wheel/flaskstarter) 
 
@@ -31,6 +31,8 @@ To start a project, create its folder and:
 If you do want to use the same project's root folder as main module name:
 
 `flaskstarter init .`
+
+> It won't create a requirements.txt on its own anymore, so you feel free to choose your tools.
 
 To see init's help:
 

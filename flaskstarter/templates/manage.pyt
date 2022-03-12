@@ -110,16 +110,14 @@ def plug_database():
         exit(0)
 
     # add and install requirements
-    with open('requirements.txt', 'a') as requirements:
-        requirements.write(
-            f'flask-sqlalchemy{os.linesep}flask-migrate{os.linesep}')
     cmd = ''
     if os.name == 'posix':
-        cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
-        subprocess.call(cmd, shell=True)
+        cmd = f'pip install flask-sqlalchemy flask-migrate;'
     elif os.name == 'nt':
-        cmd = f'pip install -r {os.path.join(os.getcwd(), "requirements.txt")};'
-        subprocess.run(['powershell', '-Command', cmd])
+        cmd = f'pip install flask-sqlalchemy flask-migrate;'
+    subprocess.call(cmd, shell=True)
+    click.echo("Remember to add flask-sqlalchemy and flask-migrate to the list of dependencies")
+    click.pause()
     # project.ext.database
     with open(os.path.join(os.getcwd(), '{{name}}', 'ext', 'database.py'), 'w') as db_module:
         db_template = get_template('database.pyt')
