@@ -46,6 +46,7 @@ def runserver(port):
 @manage.command()
 @click.argument('name')
 def plug_extension(name: str):
+    '''Creates and preconfigure a extension file skeleton.'''
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     if f'{{name}}.ext.{name}:init_app' in settings['default']['EXTENSIONS']:
@@ -151,6 +152,7 @@ def plug_database():
 @manage.command()
 @click.argument('message')
 def db_migrate(message):
+    '''Creates a migration script by scanning the project's models.'''
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     if '{{name}}.ext.database:init_app' not in settings['default']['EXTENSIONS']:
@@ -165,6 +167,7 @@ def db_migrate(message):
 
 @manage.command()
 def db_upgrade():
+    '''Applies the migration scripts on the configured database.'''
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     if '{{name}}.ext.database:init_app' not in settings['default']['EXTENSIONS']:
@@ -179,6 +182,7 @@ def db_upgrade():
 
 @manage.command()
 def db_downgrade():
+    '''Removes the last migration effects from the database.'''
     settings = toml.load(os.path.join(
         os.getcwd(), 'instance', 'settings.toml'))
     if '{{name}}.ext.database:init_app' not in settings['default']['EXTENSIONS']:

@@ -35,8 +35,8 @@ def init(name: str):
     """Creates the project's source tree.
 
     Args:
-        name (str): Project's main package's name to create. If it's a dot, will use current
-                    directory as project's name.
+
+      - name (str): Project's main package's name to create. If it's a dot, will use current directory as project's name.
 
     """
     # All directories and basic python files are created here
