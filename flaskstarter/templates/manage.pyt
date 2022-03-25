@@ -29,6 +29,18 @@ from flaskstarter.tools.templating import get_template
 def manage():
     '''This script manages the {{name}} project.'''
 
+@manage.command()
+def basic_deploy():
+    '''Creates the basic deployment structure into the project.'''
+    os.makedirs(os.path.join(os.getcwd(), "instance", "uploads"))
+    destination = os.path.join(os.getcwd(), "instance", "settings.toml")
+    with open(destination, "w") as f:
+        template_file = get_template("settings.tomlt")
+        f.write(template_file.render(name="{{name}}"))
+    click.echo('Basic deployment directories created.')
+    click.echo('Remember to list the extensions and blueprints, as well as its configurations.')
+
+
 
 @manage.command()
 @click.argument('port', default='5000')
