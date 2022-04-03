@@ -72,7 +72,10 @@ def runserver(port):
 def plug_extension(name: str):
     """Creates and preconfigure a extension file skeleton."""
     settings = toml.load(os.path.join(os.getcwd(), "instance", "settings.toml"))
-    if f"{get_app_dir()}.ext.{name}:init_app" in settings["default"]["EXTENSIONS"]:
+    if (
+        f"{get_app_dir()}.ext.{name}:init_app"
+        in settings["default"]["EXTENSIONS"]
+    ):
         click.echo("An extension with such a name seems to be already plugged.")
         exit(0)
     # project.ext.database
@@ -82,7 +85,9 @@ def plug_extension(name: str):
         ext_template = get_template("ext.pyt")
         new_extension.write(ext_template.render())
 
-    settings["default"]["EXTENSIONS"].append(f"{get_app_dir()}.ext.{name}:init_app")
+    settings["default"]["EXTENSIONS"].append(
+        f"{get_app_dir()}.ext.{name}:init_app"
+    )
     with open(os.path.join(os.getcwd(), "instance", "settings.toml"), "w") as f:
         f.write(toml.dumps(settings))
 
@@ -118,11 +123,17 @@ def plug_blueprint(name: str, templates: bool):
         click.echo(f"Placed this blueprint's templates under {tf}")
 
     init = open(
-        os.path.join(os.getcwd(), get_app_dir(), "blueprints", name, "__init__.py"), "w"
+        os.path.join(
+            os.getcwd(), get_app_dir(), "blueprints", name, "__init__.py"
+        ),
+        "w",
     )
     init.close()
     with open(
-        os.path.join(os.getcwd(), get_app_dir(), "blueprints", name, f"{name}.py"), "w"
+        os.path.join(
+            os.getcwd(), get_app_dir(), "blueprints", name, f"{name}.py"
+        ),
+        "w",
     ) as blueprint:
         bluet = get_template("blueprint.pyt")
         blueprint.write(bluet.render(name=name, templates=templates))
@@ -144,7 +155,10 @@ def plug_database():
     """Adds a basic set of models to project and let it ready for migrations. At the start it will be set to flask_sqlalchemy as ORM and sqlite as database, as well as use flask_migrate as migration tool."""
     # setup tasks
     settings = toml.load(os.path.join(os.getcwd(), "instance", "settings.toml"))
-    if f"{get_app_dir()}.ext.database:init_app" in settings["default"]["EXTENSIONS"]:
+    if (
+        f"{get_app_dir()}.ext.database:init_app"
+        in settings["default"]["EXTENSIONS"]
+    ):
         click.echo("Database seems to be already plugged.")
         exit(0)
 
@@ -173,10 +187,12 @@ def plug_database():
         models_file.write(mod_template.render(project=get_app_dir()))
     # settings.toml
     settings = toml.load(os.path.join(os.getcwd(), "instance", "settings.toml"))
-    settings["default"]["EXTENSIONS"].append(f"{get_app_dir()}.ext.database:init_app")
-    settings["default"]["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
-        os.getcwd(), "instance", "db.sqlite3"
+    settings["default"]["EXTENSIONS"].append(
+        f"{get_app_dir()}.ext.database:init_app"
     )
+    settings["default"][
+        "SQLALCHEMY_DATABASE_URI"
+    ] = "sqlite:///" + os.path.join(os.getcwd(), "instance", "db.sqlite3")
     with open(os.path.join(os.getcwd(), "instance", "settings.toml"), "w") as f:
         f.write(toml.dumps(settings))
 
