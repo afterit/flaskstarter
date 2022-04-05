@@ -1,4 +1,4 @@
-# flaskstarter 0.6
+# flaskstarter 0.6.1
 
 ![](https://img.shields.io/pypi/l/flaskstarter) ![](https://img.shields.io/pypi/v/flaskstarter) ![](https://img.shields.io/pypi/wheel/flaskstarter) 
 
