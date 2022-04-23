@@ -1,4 +1,4 @@
-# flaskstarter 0.6.1
+# flaskstarter 0.7
 
 ![](https://img.shields.io/pypi/l/flaskstarter) ![](https://img.shields.io/pypi/v/flaskstarter) ![](https://img.shields.io/pypi/wheel/flaskstarter) 
 
@@ -9,8 +9,8 @@ Flaskstarter assumes you know about Flask microframework and its mechanics in a 
 It also assumes you are using Python 3.6+.
 
 > Flaskstarter recommends the use of a python virtual environment for project
-> to work safely and isolated from your systems binnaries. Activate it before
-> the next steps.
+> to work safely and isolated from your systems binnaries. You should create
+> and activate it before the next steps.
 
 To install flaskstarter use the usual:
 
@@ -47,14 +47,16 @@ By now you can create a blueprint structure by typing the bellow on project root
 
 If it will work as an API blueprint, that's enough. But maybe it is not and you want to use private templates related only to this blueprint. This is solved by adding a '-t' or '--templates' to the above command.
 
-After that, flaskstarter goes onto instance/settings.toml file to register the blueprint on it. There is an EXTENSIONS variable where you can list all the plugins to autoimport if you create any by hand. It uses factory design.
+After that, flaskstarter goes onto main module > settings.toml file to register the blueprint on it. There is an EXTENSIONS variable where you can list all the plugins to autoimport if you create any by hand. It uses factory design.
+
+For secrets settings, as secret_key and database configurations, refer to instance/.secrets.settings.toml
 
 Most of the times you are adding some extensions and middlewares to your app, so
 you can add an empty skelleton to instanciate and plug to app by typing:
 
 `$ python manage.py plug-extension [name]`
 
-As with blueprints, flaskstarter registers extensions on instance/settings.
+As with blueprints, flaskstarter registers extensions on main module > settings.toml.
 
 To run your app you can use the bellow on project root:
 
@@ -86,7 +88,7 @@ flask db (command) as its documentation guides.
 
 ## What the project does for you
 
-It creates project tree, a functional virtualenv on .venv, the init and routes files with a helloworld example and a manage.py script to run the project with the virtual enviroment created and attach blueprints to it. It now installs the requirements on project's .venv on POSIX systems. Feel free to change to poetry and pyproject.toml pattern.
+It creates project tree, the init and routes files with a helloworld example and a manage.py script to run the project and attach blueprints to it. The project settings are now on main module directory, so they can be persisted to a CVS repository.
 
 A word of warning: when commiting and pushing your project to versioning servers, remember to put instance folder into .gitignore, if not yet. And then remember to place it into deploy destination.
 
@@ -98,7 +100,6 @@ It doesn't force you to use poetry or any other tool but flask, toml and dynacon
 
 - Add automated tests for development enviroment of flaskstarter
 - Work on a better architecture for the generated project
-- Start new extensions by manage.py creating an empty skeleton
 
 ## How can you help on flaskstarter development?
 
