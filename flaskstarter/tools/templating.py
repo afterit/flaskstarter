@@ -12,7 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-from jinja2 import Environment, PackageLoader, select_autoescape, Template
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
 
 env = Environment(
     loader=PackageLoader("flaskstarter", "templates"),

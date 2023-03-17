@@ -1,0 +1,11 @@
+site_name: Flaskstarter
+repo_url: https://github.com/felipebastos/python-basic
+repo_name: felipebastos/python-basic
+edit_uri: tree/main/docs
+
+theme:
+  name: material
+  language: pt-BR
+
+markdown_extensions:
+  - attr_list

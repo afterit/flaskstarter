@@ -1,10 +1,11 @@
 """Flaskstarter init tests.
 """
 import os
-import requests
 import signal
 import subprocess as shell
 import time
+
+import requests
 
 
 def test_project_is_created_with_default_name(testing_directory):
@@ -24,7 +25,9 @@ def test_project_is_created_with_default_name(testing_directory):
 def test_flaskstarter_projet_runs(testing_directory):
     """Tests if fresh project is runnable."""
     cmd = f"cd {testing_directory}; python manage.py runserver"
-    app = shell.Popen(cmd, stdout=shell.PIPE, shell=True, preexec_fn=os.setsid)
+    app = shell.Popen(
+        cmd, stdout=shell.PIPE, shell=True, preexec_fn=os.setsid()
+    )
     time.sleep(2)
     get_root = "http://127.0.0.1:5000/"
     response = requests.get(get_root)

@@ -1,6 +1,7 @@
-import pytest
 import os
 import shutil
+
+import pytest
 
 
 @pytest.fixture(scope="module")

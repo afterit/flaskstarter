@@ -14,10 +14,10 @@
 """
 
 import os
+
 import click
 
 from flaskstarter import __version__
-
 from flaskstarter.tools.templating import get_template
 
 
@@ -48,11 +48,15 @@ def init(name: str):
     try:
         os.mkdir(os.path.join(os.getcwd(), name))
     except FileExistsError:
-        click.echo(f'Project or module with name "{name}" already exists. Exiting.')
+        click.echo(
+            f'Project or module with name "{name}" already exists. Exiting.'
+        )
         exit(0)
 
     os.makedirs(os.path.join(os.getcwd(), name, "ext"))
-    ext_is_package = open(os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w")
+    ext_is_package = open(
+        os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w"
+    )
     ext_is_package.close()
     os.makedirs(os.path.join(os.getcwd(), name, "blueprints"))
     blueprint_is_package = open(
@@ -68,13 +72,19 @@ def init(name: str):
     os.makedirs(os.path.join(os.getcwd(), "instance", "uploads"))
     click.echo("Done!")
 
-    click.echo("Creating first python scripts and configurations... ", nl=False)
+    click.echo(
+        "Creating first python scripts and configurations... ", nl=False
+    )
 
     templates_and_dest = {
         "app.pyt": os.path.join(os.getcwd(), name, "app.py"),
         "views.pyt": os.path.join(os.getcwd(), name, "views.py"),
-        "index.htmlt": os.path.join(os.getcwd(), name, "templates", "index.html"),
-        "configuration.pyt": os.path.join(os.getcwd(), name, "ext", "configuration.py"),
+        "index.htmlt": os.path.join(
+            os.getcwd(), name, "templates", "index.html"
+        ),
+        "configuration.pyt": os.path.join(
+            os.getcwd(), name, "ext", "configuration.py"
+        ),
         ".secrets.settings.tomlt": os.path.join(
             os.getcwd(), "instance", ".secrets.settings.toml"
         ),
@@ -105,4 +115,6 @@ def init(name: str):
 
 
 if __name__ == "__main__":
-    flaskstarter(prog_name="flaskstarter")  # pylint: disable=unexpected-keyword-arg
+    flaskstarter(
+        prog_name="flaskstarter"
+    )  # pylint: disable=unexpected-keyword-arg

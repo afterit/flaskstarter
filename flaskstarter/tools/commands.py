@@ -17,12 +17,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-import click
 import os
 import subprocess
-import toml
-
 from importlib import import_module
+
+import click
+import toml
 
 from flaskstarter.tools.templating import get_template
 
@@ -44,7 +44,9 @@ def manage():
 def basic_deploy():
     """Creates the basic deployment structure into the project."""
     os.makedirs(os.path.join(os.getcwd(), "instance", "uploads"))
-    destination = os.path.join(os.getcwd(), "instance", ".secrets.settings.toml")
+    destination = os.path.join(
+        os.getcwd(), "instance", ".secrets.settings.toml"
+    )
     with open(destination, "w") as f:
         template_file = get_template(".secrets.settings.tomlt")
         f.write(template_file.render(name=get_app_dir()))
@@ -71,9 +73,16 @@ def runserver(port):
 @click.argument("name")
 def plug_extension(name: str):
     """Creates and preconfigure a extension file skeleton."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if f"{get_app_dir()}.ext.{name}:init_app" in settings["default"]["EXTENSIONS"]:
-        click.echo("An extension with such a name seems to be already plugged.")
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
+    if (
+        f"{get_app_dir()}.ext.{name}:init_app"
+        in settings["default"]["EXTENSIONS"]
+    ):
+        click.echo(
+            "An extension with such a name seems to be already plugged."
+        )
         exit(0)
     # project.ext.database
     with open(
@@ -82,8 +91,12 @@ def plug_extension(name: str):
         ext_template = get_template("ext.pyt")
         new_extension.write(ext_template.render())
 
-    settings["default"]["EXTENSIONS"].append(f"{get_app_dir()}.ext.{name}:init_app")
-    with open(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w") as f:
+    settings["default"]["EXTENSIONS"].append(
+        f"{get_app_dir()}.ext.{name}:init_app"
+    )
+    with open(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w"
+    ) as f:
         f.write(toml.dumps(settings))
 
     click.echo(
@@ -102,7 +115,9 @@ def plug_extension(name: str):
 )
 def plug_blueprint(name: str, templates: bool):
     """Creates blueprint under blueprints directory and adds it to instance's settings.toml."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
     if (
         f"{get_app_dir()}.blueprints.{name}.{name}:init_app"
         in settings["default"]["EXTENSIONS"]
@@ -118,22 +133,30 @@ def plug_blueprint(name: str, templates: bool):
         click.echo(f"Placed this blueprint's templates under {tf}")
 
     init = open(
-        os.path.join(os.getcwd(), get_app_dir(), "blueprints", name, "__init__.py"),
+        os.path.join(
+            os.getcwd(), get_app_dir(), "blueprints", name, "__init__.py"
+        ),
         "w",
     )
     init.close()
     with open(
-        os.path.join(os.getcwd(), get_app_dir(), "blueprints", name, f"{name}.py"),
+        os.path.join(
+            os.getcwd(), get_app_dir(), "blueprints", name, f"{name}.py"
+        ),
         "w",
     ) as blueprint:
         bluet = get_template("blueprint.pyt")
         blueprint.write(bluet.render(name=name, templates=templates))
 
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
     settings["default"]["EXTENSIONS"].append(
         f"{get_app_dir()}.blueprints.{name}.{name}:init_app"
     )
-    with open(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w") as f:
+    with open(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w"
+    ) as f:
         f.write(toml.dumps(settings))
 
     click.echo(
@@ -145,8 +168,13 @@ def plug_blueprint(name: str, templates: bool):
 def plug_database():
     """Adds a basic set of models to project and let it ready for migrations. At the start it will be set to flask_sqlalchemy as ORM and sqlite as database, as well as use flask_migrate as migration tool."""
     # setup tasks
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if f"{get_app_dir()}.ext.database:init_app" in settings["default"]["EXTENSIONS"]:
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
+    if (
+        f"{get_app_dir()}.ext.database:init_app"
+        in settings["default"]["EXTENSIONS"]
+    ):
         click.echo("Database seems to be already plugged.")
         exit(0)
 
@@ -174,12 +202,18 @@ def plug_database():
         mod_template = get_template("models.pyt")
         models_file.write(mod_template.render(project=get_app_dir()))
     # settings.toml
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    settings["default"]["EXTENSIONS"].append(f"{get_app_dir()}.ext.database:init_app")
-    settings["default"]["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
-        os.getcwd(), "instance", "db.sqlite3"
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
     )
-    with open(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w") as f:
+    settings["default"]["EXTENSIONS"].append(
+        f"{get_app_dir()}.ext.database:init_app"
+    )
+    settings["default"][
+        "SQLALCHEMY_DATABASE_URI"
+    ] = "sqlite:///" + os.path.join(os.getcwd(), "instance", "db.sqlite3")
+    with open(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w"
+    ) as f:
         f.write(toml.dumps(settings))
 
     click.echo("Creating migrations directory")
@@ -200,7 +234,9 @@ def plug_database():
 @click.argument("message")
 def db_migrate(message):
     """Creates a migration script by scanning the project's models."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
     if (
         f"{get_app_dir()}.ext.database:init_app"
         not in settings["default"]["EXTENSIONS"]
@@ -218,7 +254,9 @@ def db_migrate(message):
 @manage.command()
 def db_upgrade():
     """Applies the migration scripts on the configured database."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
     if (
         f"{get_app_dir()}.ext.database:init_app"
         not in settings["default"]["EXTENSIONS"]
@@ -236,7 +274,9 @@ def db_upgrade():
 @manage.command()
 def db_downgrade():
     """Removes the last migration effects from the database."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
+    settings = toml.load(
+        os.path.join(os.getcwd(), get_app_dir(), "settings.toml")
+    )
     if (
         f"{get_app_dir()}.ext.database:init_app"
         not in settings["default"]["EXTENSIONS"]
