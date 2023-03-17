@@ -6,6 +6,11 @@ edit_uri: tree/main/docs
 theme:
   name: material
   language: pt-BR
+  logo: assets/flaskstarter.png
+  favicon: assets/flaskstarter.png
+
+plugins: 
+  - mkdocstrings
 
 markdown_extensions:
   - attr_list

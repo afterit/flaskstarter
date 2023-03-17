@@ -1,0 +1,3 @@
+# Template de app.py
+
+O template para App funciona da seguinte forma...

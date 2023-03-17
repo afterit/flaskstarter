@@ -1,0 +1,3 @@
+# Requirements
+
+::: flaskstarter.tools.requirements

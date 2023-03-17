@@ -4,6 +4,11 @@ from .views import root
 
 
 def create_app() -> Flask:
+    """Create the Flask app and returns it.
+
+    Returns:
+        Flask: a Flask app dynamically configured by settings.toml file.
+    """
     app = Flask(__name__)
     configuration.init_app(app)
 

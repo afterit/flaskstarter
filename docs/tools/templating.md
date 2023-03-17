@@ -1,0 +1,3 @@
+# Templating
+
+::: flaskstarter.tools.templating
