@@ -14,10 +14,10 @@ limitations under the License.
 """
 
 import os
+
 import click
 
 from flaskstarter import __version__
-
 from flaskstarter.tools.templating import get_template
 
 

@@ -61,7 +61,7 @@ lint = { cmd = 'pylint -f text . > linter-report.txt', help = 'Checagem estátic
 onboard = { cmd = 'pre-commit install', help = 'Instala os hooks de pre-commit' }
 requirements = { cmd = 'poetry export -o requirements.txt', help = 'Exporta o requirements.txt' }
 secure = { cmd = 'bandit -r src/flaskstarter', help = 'Gera relatório de falhas de segurança no código.' }
-test = { cmd = 'python manage.py test', help = 'Executa os testes' }
+test = { cmd = 'pytest', help = 'Executa os testes' }
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
