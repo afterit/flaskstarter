@@ -20,7 +20,9 @@ limitations under the License.
 
 import os
 import subprocess
+import sys
 from importlib import import_module
+from pathlib import Path
 
 import click
 import toml
@@ -29,11 +31,87 @@ from flaskstarter.tools.templating import get_template
 
 
 def get_app_dir():
-    for item in os.listdir():
-        if os.path.isdir(item):
-            if "app.py" in os.listdir(item):
-                return item
+    """Get the application directory by looking for app.py file."""
+    current_path = Path.cwd()
+    for item in current_path.iterdir():
+        if item.is_dir():
+            app_py_path = item / "app.py"
+            if app_py_path.exists():
+                return item.name
     return None
+
+
+def validate_port(port_str):
+    """Validate port number to prevent injection attacks."""
+    try:
+        port = int(port_str)
+        if 1 <= port <= 65535:
+            return port
+        else:
+            raise ValueError("Port must be between 1 and 65535")
+    except ValueError as e:
+        raise click.BadParameter(f"Invalid port number: {e}")
+
+
+def run_flask_command(app_dir, command_args, env_vars=None):
+    """
+    Safely execute Flask commands using subprocess without shell=True.
+
+    Args:
+        app_dir: Application directory name
+        command_args: List of command arguments
+        env_vars: Dictionary of environment variables to set
+    """
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
+
+    # Prepare environment
+    env = os.environ.copy()
+    env["FLASK_APP"] = f"{app_dir}.app"
+    env["FLASK_ENV"] = "development"
+
+    if env_vars:
+        env.update(env_vars)
+
+    # Build command list (no shell=True needed)
+    cmd = ["flask"] + command_args
+
+    try:
+        result = subprocess.run(
+            cmd, env=env, capture_output=False, check=True, text=True
+        )
+        return result
+    except subprocess.CalledProcessError as e:
+        raise click.ClickException(f"Command failed with exit code {e.returncode}")
+    except FileNotFoundError:
+        raise click.ClickException(
+            "Flask command not found. Make sure Flask is installed."
+        )
+
+
+def install_packages(packages):
+    """
+    Safely install Python packages using pip.
+
+    Args:
+        packages: List of package names to install
+    """
+    if not packages:
+        return
+
+    # Validate package names (basic validation)
+    for package in packages:
+        if not package.replace("-", "").replace("_", "").isalnum():
+            raise click.ClickException(f"Invalid package name: {package}")
+
+    cmd = [sys.executable, "-m", "pip", "install"] + packages
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, check=True, text=True)
+        click.echo(f"Successfully installed: {', '.join(packages)}")
+        return result
+    except subprocess.CalledProcessError as e:
+        raise click.ClickException(f"Failed to install packages: {e.stderr}")
 
 
 @click.group()
@@ -44,52 +122,92 @@ def manage():
 @manage.command()
 def basic_deploy():
     """Creates the basic deployment structure into the project."""
-    os.makedirs(os.path.join(os.getcwd(), "instance", "uploads"))
-    destination = os.path.join(os.getcwd(), "instance", ".secrets.settings.toml")
-    with open(destination, "w") as f:
-        template_file = get_template(".secrets.settings.tomlt")
-        f.write(template_file.render(name=get_app_dir()))
-    click.echo("Basic deployment directories created.")
-    click.echo(
-        "Remember to list the extensions and blueprints, as well as its configurations."
-    )
+    try:
+        instance_path = Path.cwd() / "instance"
+        uploads_path = instance_path / "uploads"
+        uploads_path.mkdir(parents=True, exist_ok=True)
+
+        secrets_file = instance_path / ".secrets.settings.toml"
+        app_dir = get_app_dir()
+
+        if not app_dir:
+            raise click.ClickException("Could not find application directory")
+
+        with open(secrets_file, "w", encoding="utf-8") as f:
+            template_file = get_template(".secrets.settings.tomlt")
+            f.write(template_file.render(name=app_dir))
+
+        click.echo("Basic deployment directories created.")
+        click.echo(
+            "Remember to list the extensions and blueprints, as well as its configurations."
+        )
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to create deployment structure: {e}")
 
 
 @manage.command()
 @click.argument("port", default="5000")
 def runserver(port):
     """Run Flask server on development mode and selected TCP port."""
-    cmd = ""
-    if os.name == "posix":
-        cmd = f"export FLASK_APP={get_app_dir()}.app; export FLASK_ENV=development; flask run --port={port}"
-        subprocess.run(cmd, shell=True)
-    elif os.name == "nt":
-        cmd = f'$env:FLASK_APP = "{get_app_dir()}.app"; $env:FLASK_ENV = "development"; flask run --port={port}'
-        subprocess.run(["powershell", "-Command", cmd])
+    validated_port = validate_port(port)
+    app_dir = get_app_dir()
+
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
+
+    try:
+        run_flask_command(app_dir, ["run", "--port", str(validated_port)])
+    except Exception as e:
+        raise click.ClickException(f"Failed to start server: {e}")
 
 
 @manage.command()
 @click.argument("name")
 def plug_extension(name: str):
     """Creates and preconfigure a extension file skeleton."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if f"{get_app_dir()}.ext.{name}:init_app" in settings["default"]["EXTENSIONS"]:
-        click.echo("An extension with such a name seems to be already plugged.")
-        exit(0)
-    # project.ext.database
-    with open(
-        os.path.join(os.getcwd(), get_app_dir(), "ext", f"{name}.py"), "w"
-    ) as new_extension:
-        ext_template = get_template("ext.pyt")
-        new_extension.write(ext_template.render())
+    # Validate extension name
+    if not name.isidentifier():
+        raise click.BadParameter("Extension name must be a valid Python identifier")
 
-    settings["default"]["EXTENSIONS"].append(f"{get_app_dir()}.ext.{name}:init_app")
-    with open(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w") as f:
-        f.write(toml.dumps(settings))
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
 
-    click.echo(
-        "Extension added and configured. Remember to code it, as it is just a skeleton."
-    )
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
+
+        extension_ref = f"{app_dir}.ext.{name}:init_app"
+        if extension_ref in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("An extension with such a name seems to be already plugged.")
+            return
+
+        # Create extension file
+        ext_path = Path.cwd() / app_dir / "ext" / f"{name}.py"
+        ext_path.parent.mkdir(exist_ok=True)
+
+        with open(ext_path, "w", encoding="utf-8") as new_extension:
+            ext_template = get_template("ext.pyt")
+            new_extension.write(ext_template.render())
+
+        # Update settings
+        if "default" not in settings:
+            settings["default"] = {}
+        if "EXTENSIONS" not in settings["default"]:
+            settings["default"]["EXTENSIONS"] = []
+
+        settings["default"]["EXTENSIONS"].append(extension_ref)
+
+        with open(settings_path, "w", encoding="utf-8") as f:
+            f.write(toml.dumps(settings))
+
+        click.echo(
+            "Extension added and configured. Remember to code it, as it is just a skeleton."
+        )
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to create extension: {e}")
 
 
 @manage.command()
@@ -103,150 +221,209 @@ def plug_extension(name: str):
 )
 def plug_blueprint(name: str, templates: bool):
     """Creates blueprint under blueprints directory and adds it to instance's settings.toml."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if (
-        f"{get_app_dir()}.blueprints.{name}.{name}:init_app"
-        in settings["default"]["EXTENSIONS"]
-    ):
-        click.echo("A blueprint with such a name seems to be already plugged.")
-        exit(0)
-    os.mkdir(os.path.join(os.getcwd(), get_app_dir(), "blueprints", name))
-    if templates:
-        tf = os.path.join(
-            os.getcwd(), get_app_dir(), "blueprints", name, "templates", name
+    # Validate blueprint name
+    if not name.isidentifier():
+        raise click.BadParameter("Blueprint name must be a valid Python identifier")
+
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
+
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
+
+        blueprint_ref = f"{app_dir}.blueprints.{name}.{name}:init_app"
+        if blueprint_ref in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("A blueprint with such a name seems to be already plugged.")
+            return
+
+        # Create blueprint directory structure
+        blueprint_path = Path.cwd() / app_dir / "blueprints" / name
+        blueprint_path.mkdir(parents=True, exist_ok=True)
+
+        if templates:
+            template_path = blueprint_path / "templates" / name
+            template_path.mkdir(parents=True, exist_ok=True)
+            click.echo(f"Placed this blueprint's templates under {template_path}")
+
+        # Create __init__.py
+        init_file = blueprint_path / "__init__.py"
+        init_file.touch()
+
+        # Create blueprint file
+        blueprint_file = blueprint_path / f"{name}.py"
+        with open(blueprint_file, "w", encoding="utf-8") as f:
+            bluet = get_template("blueprint.pyt")
+            f.write(bluet.render(name=name, templates=templates))
+
+        # Update settings
+        if "default" not in settings:
+            settings["default"] = {}
+        if "EXTENSIONS" not in settings["default"]:
+            settings["default"]["EXTENSIONS"] = []
+
+        settings["default"]["EXTENSIONS"].append(blueprint_ref)
+
+        with open(settings_path, "w", encoding="utf-8") as f:
+            f.write(toml.dumps(settings))
+
+        click.echo(
+            "Blueprint created and registered on instance/settings.toml. Restart your app if running."
         )
-        os.makedirs(tf)
-        click.echo(f"Placed this blueprint's templates under {tf}")
 
-    init = open(
-        os.path.join(os.getcwd(), get_app_dir(), "blueprints", name, "__init__.py"),
-        "w",
-    )
-    init.close()
-    with open(
-        os.path.join(os.getcwd(), get_app_dir(), "blueprints", name, f"{name}.py"),
-        "w",
-    ) as blueprint:
-        bluet = get_template("blueprint.pyt")
-        blueprint.write(bluet.render(name=name, templates=templates))
-
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    settings["default"]["EXTENSIONS"].append(
-        f"{get_app_dir()}.blueprints.{name}.{name}:init_app"
-    )
-    with open(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w") as f:
-        f.write(toml.dumps(settings))
-
-    click.echo(
-        "Blueprint created and registered on instance/settings.toml. Restart your app if running."
-    )
+    except Exception as e:
+        raise click.ClickException(f"Failed to create blueprint: {e}")
 
 
 @manage.command()
 def plug_database():
-    """Adds a basic set of models to project and let it ready for migrations. At the start it will be set to flask_sqlalchemy as ORM and sqlite as database, as well as use flask_migrate as migration tool."""
-    # setup tasks
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if f"{get_app_dir()}.ext.database:init_app" in settings["default"]["EXTENSIONS"]:
-        click.echo("Database seems to be already plugged.")
-        exit(0)
+    """Adds a basic set of models to project and let it ready for migrations."""
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
 
-    # add and install requirements
-    cmd = ""
-    if os.name == "posix":
-        cmd = f"pip install flask-sqlalchemy flask-migrate;"
-    elif os.name == "nt":
-        cmd = f"pip install flask-sqlalchemy flask-migrate;"
-    subprocess.call(cmd, shell=True)
-    click.echo(
-        "Remember to add flask-sqlalchemy and flask-migrate to the list of dependencies"
-    )
-    click.pause()
-    # project.ext.database
-    with open(
-        os.path.join(os.getcwd(), get_app_dir(), "ext", "database.py"), "w"
-    ) as db_module:
-        db_template = get_template("database.pyt")
-        db_module.write(db_template.render(name=get_app_dir()))
-    # models.py (basic example)
-    with open(
-        os.path.join(os.getcwd(), get_app_dir(), "models.py"), "w"
-    ) as models_file:
-        mod_template = get_template("models.pyt")
-        models_file.write(mod_template.render(project=get_app_dir()))
-    # settings.toml
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    settings["default"]["EXTENSIONS"].append(f"{get_app_dir()}.ext.database:init_app")
-    settings["default"]["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
-        os.getcwd(), "instance", "db.sqlite3"
-    )
-    with open(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"), "w") as f:
-        f.write(toml.dumps(settings))
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
 
-    click.echo("Creating migrations directory")
-    cmd = ""
-    if os.name == "posix":
-        cmd = f"export FLASK_APP={get_app_dir()}.app; export FLASK_ENV=development; flask db init"
-        subprocess.run(cmd, shell=True)
-    elif os.name == "nt":
-        cmd = f'$env:FLASK_APP = "{get_app_dir()}.app"; $env:FLASK_ENV = "development"; flask db init'
-        subprocess.run(["powershell", "-Command", cmd])
+        db_extension_ref = f"{app_dir}.ext.database:init_app"
+        if db_extension_ref in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("Database seems to be already plugged.")
+            return
 
-    click.echo(
-        "Everything is setted up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app."
-    )
+        # Install required packages
+        packages_to_install = ["flask-sqlalchemy", "flask-migrate"]
+        click.echo(f"Installing packages: {', '.join(packages_to_install)}")
+        install_packages(packages_to_install)
+
+        click.echo(
+            "Remember to add flask-sqlalchemy and flask-migrate to the list of dependencies"
+        )
+        click.pause()
+
+        # Create database extension
+        ext_path = Path.cwd() / app_dir / "ext"
+        ext_path.mkdir(exist_ok=True)
+
+        db_file = ext_path / "database.py"
+        with open(db_file, "w", encoding="utf-8") as f:
+            db_template = get_template("database.pyt")
+            f.write(db_template.render(name=app_dir))
+
+        # Create models file
+        models_file = Path.cwd() / app_dir / "models.py"
+        with open(models_file, "w", encoding="utf-8") as f:
+            mod_template = get_template("models.pyt")
+            f.write(mod_template.render(project=app_dir))
+
+        # Update settings
+        if "default" not in settings:
+            settings["default"] = {}
+        if "EXTENSIONS" not in settings["default"]:
+            settings["default"]["EXTENSIONS"] = []
+
+        settings["default"]["EXTENSIONS"].append(db_extension_ref)
+        settings["default"]["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + str(
+            Path.cwd() / "instance" / "db.sqlite3"
+        )
+
+        with open(settings_path, "w", encoding="utf-8") as f:
+            f.write(toml.dumps(settings))
+
+        # Initialize database migrations
+        click.echo("Creating migrations directory")
+        run_flask_command(app_dir, ["db", "init"])
+
+        click.echo(
+            "Everything is set up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app."
+        )
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to set up database: {e}")
 
 
 @manage.command()
 @click.argument("message")
 def db_migrate(message):
     """Creates a migration script by scanning the project's models."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if (
-        f"{get_app_dir()}.ext.database:init_app"
-        not in settings["default"]["EXTENSIONS"]
-    ):
-        click.echo("No database plugged.")
-        exit(0)
-    from flask_migrate import migrate
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
 
-    project = import_module(f"{get_app_dir()}.app")
-    app = project.create_app()
-    with app.app_context():
-        migrate(message=message)
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
+
+        db_extension_ref = f"{app_dir}.ext.database:init_app"
+        if db_extension_ref not in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("No database plugged.")
+            return
+
+        from flask_migrate import migrate
+
+        project = import_module(f"{app_dir}.app")
+        app = project.create_app()
+        with app.app_context():
+            migrate(message=message)
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to create migration: {e}")
 
 
 @manage.command()
 def db_upgrade():
     """Applies the migration scripts on the configured database."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if (
-        f"{get_app_dir()}.ext.database:init_app"
-        not in settings["default"]["EXTENSIONS"]
-    ):
-        click.echo("No database plugged.")
-        exit(0)
-    from flask_migrate import upgrade
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
 
-    project = import_module(f"{get_app_dir()}.app")
-    app = project.create_app()
-    with app.app_context():
-        upgrade()
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
+
+        db_extension_ref = f"{app_dir}.ext.database:init_app"
+        if db_extension_ref not in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("No database plugged.")
+            return
+
+        from flask_migrate import upgrade
+
+        project = import_module(f"{app_dir}.app")
+        app = project.create_app()
+        with app.app_context():
+            upgrade()
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to upgrade database: {e}")
 
 
 @manage.command()
 def db_downgrade():
     """Removes the last migration effects from the database."""
-    settings = toml.load(os.path.join(os.getcwd(), get_app_dir(), "settings.toml"))
-    if (
-        f"{get_app_dir()}.ext.database:init_app"
-        not in settings["default"]["EXTENSIONS"]
-    ):
-        click.echo("No database plugged.")
-        exit(0)
-    from flask_migrate import downgrade
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
 
-    project = import_module(f"{get_app_dir()}.app")
-    app = project.create_app()
-    with app.app_context():
-        downgrade()
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
+
+        db_extension_ref = f"{app_dir}.ext.database:init_app"
+        if db_extension_ref not in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("No database plugged.")
+            return
+
+        from flask_migrate import downgrade
+
+        project = import_module(f"{app_dir}.app")
+        app = project.create_app()
+        with app.app_context():
+            downgrade()
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to downgrade database: {e}")
+
+
+if __name__ == "__main__":
+    manage()
