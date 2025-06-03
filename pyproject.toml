@@ -1,38 +1,70 @@
-[tool.poetry]
+[project]
 name = "flaskstarter"
-version = "0.7"
+version = "0.8"
 description = "A Flask project start-up CLI to create Flask modular ready projects."
-authors = ["Felipe Bastos Nunes <felipe.bastosn@gmail.com>"]
+authors = [
+    {name = "Felipe Bastos Nunes",email = "felipe.bastosn@gmail.com"}
+]
 license = "Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/felipebastos/flaskstart"
-homepage = "https://github.com/felipebastos/flaskstart"
+
 keywords = ['flask', 'cli', 'project']
 classifiers = [
     'Development Status :: 3 - Alpha',      #"3 - Alpha", "4 - Beta" or "5 - Production/Stable"
     'Intended Audience :: Developers',
     'Topic :: Software Development :: Build Tools',
   ]
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "click (>=8.2.1, <9.0)",
+    "Jinja2 (>=3.1.6, <4.0)",
+    "MarkupSafe (>=3.0.2,<4.0)"
+]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-click = "^8.0.4"
-Jinja2 = "^3.0.3"
-MarkupSafe = "^2.1.0"
+[tool.poetry]
+packages = [{include = "flaskstarter", from = "src"}]
+repository = "https://github.com/felipebastos/flaskstart"
+homepage = "https://github.com/felipebastos/flaskstart"
 
-[tool.poetry.dev-dependencies]
-click = "^8.0.4"
-Jinja2 = "^3.0.3"
-MarkupSafe = "^2.1.0"
-pytest = "6.2.4"
-pylint = "2.8.3"
-Flask = "^2.1.0"
-Flask-Migrate = "3.1.0"
-dynaconf = "3.1.7"
-black = "^22.3.0"
+[tool.poetry.group.dev.dependencies]
+click = "^8.2.1"
+Jinja2 = "^3.1.6"
+MarkupSafe = "^3.0.2"
+pytest = "8.4.0"
+pylint = "3.3.7"
+Flask = "^3.1.1"
+Flask-Migrate = "4.1.0"
+dynaconf = "3.2.11"
+black = "^25.1.0"
+autopep8 = "^2.3.2"
+pytest-cov = "^6.1.1"
+isort = "^6.0.1"
+taskipy = "^1.14.1"
+bandit = "^1.8.3"
+pre-commit = "^4.2.0"
+pip-audit = "^2.9.0"
+prospector = "^1.16.1"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+include = '\.pyi?$'
+
+
+[tool.taskipy.tasks]
+audit = { cmd = 'pip-audit', help = 'Verifica falhas de segurança das dependências do projeto' }
+coverage = { cmd = 'pytest --cov', help = 'Verifica a cobertura de testes' }
+format = { cmd = 'black .', help = 'Formata o código' }
+imports = { cmd = 'isort .', help = 'Organiza os imports do projeto' }
+lint = { cmd = 'pylint -f text . > linter-report.txt', help = 'Checagem estática' }
+onboard = { cmd = 'pre-commit install', help = 'Instala os hooks de pre-commit' }
+requirements = { cmd = 'poetry export -o requirements.txt', help = 'Exporta o requirements.txt' }
+secure = { cmd = 'bandit -r src/flaskstarter', help = 'Gera relatório de falhas de segurança no código.' }
+test = { cmd = 'pytest', help = 'Executa os testes' }
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]

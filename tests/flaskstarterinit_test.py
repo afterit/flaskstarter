@@ -1,10 +1,11 @@
-"""Flaskstarter init tests.
-"""
+"""Flaskstarter init tests."""
+
 import os
-import requests
 import signal
 import subprocess as shell
 import time
+
+import requests
 
 
 def test_project_is_created_with_default_name(testing_directory):
