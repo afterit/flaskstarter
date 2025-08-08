@@ -55,8 +55,9 @@ def init(name: str):
     ext_is_package = open(os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w")
     ext_is_package.close()
     os.makedirs(os.path.join(os.getcwd(), name, "blueprints"))
+    # Ensure the blueprints directory is a proper Python package
     blueprint_is_package = open(
-        os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w"
+        os.path.join(os.getcwd(), name, "blueprints", "__init__.py"), "w"
     )
     blueprint_is_package.close()
     app_is_package = open(os.path.join(os.getcwd(), name, "__init__.py"), "w")
