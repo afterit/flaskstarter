@@ -18,4 +18,4 @@ jobs:
           pip install .
           pip install pylint
       - name: Run pylint
-        run: pylint src/flaskstarter tests
+        run: pylint --ignore=templates src/flaskstarter tests
