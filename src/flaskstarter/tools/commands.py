@@ -344,6 +344,82 @@ def plug_database():
 
 
 @manage.command()
+def plug_auth():
+    """Creates authentication extension and user model skeleton."""
+    app_dir = get_app_dir()
+    if not app_dir:
+        raise click.ClickException("Could not find application directory")
+
+    try:
+        settings_path = Path.cwd() / app_dir / "settings.toml"
+        settings = toml.load(settings_path)
+
+        db_extension_ref = f"{app_dir}.ext.database:init_app"
+        auth_extension_ref = f"{app_dir}.ext.auth:init_app"
+
+        if db_extension_ref not in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("No database plugged.")
+            return
+
+        if auth_extension_ref in settings.get("default", {}).get("EXTENSIONS", []):
+            click.echo("Auth extension seems to be already plugged.")
+            return
+
+        # Install required packages
+        packages_to_install = ["flask-login"]
+        click.echo(f"Installing packages: {', '.join(packages_to_install)}")
+        install_packages(packages_to_install)
+
+        click.echo("Remember to add flask-login to the list of dependencies")
+        click.pause()
+
+        # Create auth extension
+        ext_path = Path.cwd() / app_dir / "ext"
+        ext_path.mkdir(exist_ok=True)
+
+        auth_file = ext_path / "auth.py"
+        with open(auth_file, "w", encoding="utf-8") as f:
+            auth_template = get_template("auth.pyt")
+            f.write(auth_template.render(project=app_dir))
+
+        # Update models file with User model
+        models_file = Path.cwd() / app_dir / "models.py"
+        content = models_file.read_text(encoding="utf-8")
+        if "class User" not in content:
+            lines = content.splitlines()
+
+            if "UserMixin" not in content:
+                import_lines = [
+                    "from flask_login import UserMixin",
+                    "from werkzeug.security import generate_password_hash, check_password_hash",
+                    "",
+                ]
+                lines = lines[:1] + import_lines + lines[1:]
+
+            user_template = get_template("user.pyt")
+            lines.append("")
+            lines.extend(user_template.render().splitlines())
+
+            models_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+        # Update settings
+        if "default" not in settings:
+            settings["default"] = {}
+        if "EXTENSIONS" not in settings["default"]:
+            settings["default"]["EXTENSIONS"] = []
+
+        settings["default"]["EXTENSIONS"].append(auth_extension_ref)
+
+        with open(settings_path, "w", encoding="utf-8") as f:
+            f.write(toml.dumps(settings))
+
+        click.echo("Authentication extension and user model added. Remember to run migrations later.")
+
+    except Exception as e:
+        raise click.ClickException(f"Failed to create auth extension: {e}")
+
+
+@manage.command()
 @click.argument("message")
 def db_migrate(message):
     """Creates a migration script by scanning the project's models."""
