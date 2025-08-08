@@ -25,7 +25,11 @@ from importlib import import_module
 from pathlib import Path
 
 import click
-import toml
+
+try:
+    toml = import_module("toml")
+except ModuleNotFoundError:  # pragma: no cover
+    toml = None  # type: ignore
 
 from flaskstarter.tools.templating import get_template
 
@@ -47,8 +51,7 @@ def validate_port(port_str):
         port = int(port_str)
         if 1 <= port <= 65535:
             return port
-        else:
-            raise ValueError("Port must be between 1 and 65535")
+        raise ValueError("Port must be between 1 and 65535")
     except ValueError as e:
         raise click.BadParameter(f"Invalid port number: {e}")
 
@@ -82,11 +85,13 @@ def run_flask_command(app_dir, command_args, env_vars=None):
         )
         return result
     except subprocess.CalledProcessError as e:
-        raise click.ClickException(f"Command failed with exit code {e.returncode}")
-    except FileNotFoundError:
+        raise click.ClickException(
+            f"Command failed with exit code {e.returncode}"
+        )
+    except FileNotFoundError as exc:
         raise click.ClickException(
             "Flask command not found. Make sure Flask is installed."
-        )
+        ) from exc
 
 
 def install_packages(packages):
@@ -97,7 +102,7 @@ def install_packages(packages):
         packages: List of package names to install
     """
     if not packages:
-        return
+        return None
 
     # Validate package names (basic validation)
     for package in packages:
@@ -269,7 +274,8 @@ def plug_blueprint(name: str, templates: bool):
             f.write(toml.dumps(settings))
 
         click.echo(
-            "Blueprint created and registered on instance/settings.toml. Restart your app if running."
+            "Blueprint created and registered on instance/settings.toml. "
+            "Restart your app if running."
         )
 
     except Exception as e:
@@ -336,7 +342,8 @@ def plug_database():
         run_flask_command(app_dir, ["db", "init"])
 
         click.echo(
-            "Everything is set up. Please, before doing migrations, remember your models isn't connected to any entrypoint of your app."
+            "Everything is set up. Please, before doing migrations, remember "
+            "your models isn't connected to any entrypoint of your app."
         )
 
     except Exception as e:
@@ -365,10 +372,9 @@ def plug_auth():
             click.echo("Auth extension seems to be already plugged.")
             return
 
-        # Install required packages
-        packages_to_install = ["flask-login"]
-        click.echo(f"Installing packages: {', '.join(packages_to_install)}")
-        install_packages(packages_to_install)
+        package = "flask-login"
+        click.echo(f"Installing packages: {package}")
+        install_packages([package])
 
         click.echo("Remember to add flask-login to the list of dependencies")
         click.pause()
@@ -379,8 +385,7 @@ def plug_auth():
 
         auth_file = ext_path / "auth.py"
         with open(auth_file, "w", encoding="utf-8") as f:
-            auth_template = get_template("auth.pyt")
-            f.write(auth_template.render(project=app_dir))
+            f.write(get_template("auth.pyt").render(project=app_dir))
 
         # Update models file with User model
         models_file = Path.cwd() / app_dir / "models.py"
@@ -396,13 +401,11 @@ def plug_auth():
                 ]
                 lines = lines[:1] + import_lines + lines[1:]
 
-            user_template = get_template("user.pyt")
             lines.append("")
-            lines.extend(user_template.render().splitlines())
+            lines.extend(get_template("user.pyt").render().splitlines())
 
             models_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-        # Update settings
         if "default" not in settings:
             settings["default"] = {}
         if "EXTENSIONS" not in settings["default"]:
@@ -413,7 +416,10 @@ def plug_auth():
         with open(settings_path, "w", encoding="utf-8") as f:
             f.write(toml.dumps(settings))
 
-        click.echo("Authentication extension and user model added. Remember to run migrations later.")
+        click.echo(
+            "Authentication extension and user model added. "
+            "Remember to run migrations later."
+        )
 
     except Exception as e:
         raise click.ClickException(f"Failed to create auth extension: {e}")
@@ -436,12 +442,17 @@ def db_migrate(message):
             click.echo("No database plugged.")
             return
 
-        from flask_migrate import migrate
+        try:
+            flask_migrate = import_module("flask_migrate")
+        except ModuleNotFoundError as exc:
+            raise click.ClickException(
+                "flask_migrate is required for database migrations"
+            ) from exc
 
         project = import_module(f"{app_dir}.app")
         app = project.create_app()
         with app.app_context():
-            migrate(message=message)
+            flask_migrate.migrate(message=message)
 
     except Exception as e:
         raise click.ClickException(f"Failed to create migration: {e}")
@@ -463,12 +474,17 @@ def db_upgrade():
             click.echo("No database plugged.")
             return
 
-        from flask_migrate import upgrade
+        try:
+            flask_migrate = import_module("flask_migrate")
+        except ModuleNotFoundError as exc:
+            raise click.ClickException(
+                "flask_migrate is required for database migrations"
+            ) from exc
 
         project = import_module(f"{app_dir}.app")
         app = project.create_app()
         with app.app_context():
-            upgrade()
+            flask_migrate.upgrade()
 
     except Exception as e:
         raise click.ClickException(f"Failed to upgrade database: {e}")
@@ -490,12 +506,17 @@ def db_downgrade():
             click.echo("No database plugged.")
             return
 
-        from flask_migrate import downgrade
+        try:
+            flask_migrate = import_module("flask_migrate")
+        except ModuleNotFoundError as exc:
+            raise click.ClickException(
+                "flask_migrate is required for database migrations"
+            ) from exc
 
         project = import_module(f"{app_dir}.app")
         app = project.create_app()
         with app.app_context():
-            downgrade()
+            flask_migrate.downgrade()
 
     except Exception as e:
         raise click.ClickException(f"Failed to downgrade database: {e}")
