@@ -68,8 +68,15 @@ Now it is possible to plug a database and a migration extensions to the project.
 
 `$ python manage.py plug-database`
 
-When plug-database is ran, the manage script will create the migrations folder as 
+When plug-database is ran, the manage script will create the migrations folder as
 Alembic requires. Once it is created the following commands will be available.
+
+After plugging the database you can scaffold a basic authentication setup, which
+adds an ``auth`` extension and a ``User`` model. This can be achieved with:
+
+`$ python manage.py plug-auth`
+
+The migrations for the new model are left for you to create when desired.
 
 This will generate a migration script with Example as message:
 
