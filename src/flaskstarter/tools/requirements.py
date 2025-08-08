@@ -113,7 +113,7 @@ def install_requirements(project_path: Path, requirements_path: Path = None) -> 
             str(requirements_path),
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         click.echo("Requirements installed successfully!")
         return True
@@ -121,8 +121,10 @@ def install_requirements(project_path: Path, requirements_path: Path = None) -> 
     except subprocess.CalledProcessError as e:
         error_msg = f"Failed to install requirements: {e.stderr if e.stderr else e}"
         raise click.ClickException(error_msg)
-    except FileNotFoundError:
-        raise click.ClickException("pip command not found in virtual environment")
+    except FileNotFoundError as exc:
+        raise click.ClickException(
+            "pip command not found in virtual environment"
+        ) from exc
 
 
 def create_virtual_environment(project_path: Path, python_version: str = None) -> bool:
@@ -159,7 +161,7 @@ def create_virtual_environment(project_path: Path, python_version: str = None) -
             # Use current Python interpreter
             cmd = [sys.executable, "-m", "venv", str(venv_path)]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         click.echo("Virtual environment created successfully!")
         return True
@@ -169,8 +171,8 @@ def create_virtual_environment(project_path: Path, python_version: str = None) -
             f"Failed to create virtual environment: {e.stderr if e.stderr else e}"
         )
         raise click.ClickException(error_msg)
-    except FileNotFoundError:
-        raise click.ClickException("Python interpreter not found")
+    except FileNotFoundError as exc:
+        raise click.ClickException("Python interpreter not found") from exc
 
 
 def upgrade_pip_in_venv(project_path: Path) -> bool:
@@ -207,7 +209,7 @@ def upgrade_pip_in_venv(project_path: Path) -> bool:
 
         cmd = [str(python_executable), "-m", "pip", "install", "--upgrade", "pip"]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         click.echo("Pip upgraded successfully!")
         return True

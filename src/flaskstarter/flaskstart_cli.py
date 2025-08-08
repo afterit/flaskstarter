@@ -14,6 +14,7 @@ limitations under the License.
 """
 
 import os
+import sys
 
 import click
 
@@ -36,7 +37,8 @@ def init(name: str):
 
     Args:
 
-      - name (str): Project's main package's name to create. If it's a dot, will use current directory as project's name.
+      - name (str): Project's main package name to create. If it's a dot, uses
+        current directory as project name.
 
     """
     # All directories and basic python files are created here
@@ -48,20 +50,23 @@ def init(name: str):
     try:
         os.mkdir(os.path.join(os.getcwd(), name))
     except FileExistsError:
-        click.echo(f'Project or module with name "{name}" already exists. Exiting.')
-        exit(0)
+        click.echo(
+            f'Project or module with name "{name}" already exists. Exiting.'
+        )
+        sys.exit(0)
 
     os.makedirs(os.path.join(os.getcwd(), name, "ext"))
-    ext_is_package = open(os.path.join(os.getcwd(), name, "ext", "__init__.py"), "w")
-    ext_is_package.close()
+    ext_path = os.path.join(os.getcwd(), name, "ext", "__init__.py")
+    with open(ext_path, "w", encoding="utf-8"):
+        pass
     os.makedirs(os.path.join(os.getcwd(), name, "blueprints"))
     # Ensure the blueprints directory is a proper Python package
-    blueprint_is_package = open(
-        os.path.join(os.getcwd(), name, "blueprints", "__init__.py"), "w"
-    )
-    blueprint_is_package.close()
-    app_is_package = open(os.path.join(os.getcwd(), name, "__init__.py"), "w")
-    app_is_package.close()
+    blueprint_path = os.path.join(os.getcwd(), name, "blueprints", "__init__.py")
+    with open(blueprint_path, "w", encoding="utf-8"):
+        pass
+    app_path = os.path.join(os.getcwd(), name, "__init__.py")
+    with open(app_path, "w", encoding="utf-8"):
+        pass
 
     os.makedirs(os.path.join(os.getcwd(), name, "templates"))
     os.makedirs(os.path.join(os.getcwd(), name, "static"))
@@ -84,7 +89,7 @@ def init(name: str):
     }
 
     for template, destination in templates_and_dest.items():
-        with open(destination, "w") as f:
+        with open(destination, "w", encoding="utf-8") as f:
             template_file = get_template(template)
             f.write(template_file.render(name=name))
 
